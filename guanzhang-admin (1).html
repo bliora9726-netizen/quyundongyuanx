@@ -1,0 +1,3005 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>馆掌 · 培训管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================
+     DESIGN TOKENS
+     ============================================ */
+  :root {
+    --brand-primary: #1A4FBD;
+    --brand-deep: #0D3494;
+    --brand-accent: #2B8EF0;
+    --brand-light: #E8F0FE;
+    --brand-glow: rgba(26,79,189,0.12);
+
+    --success: #1A9C5B;
+    --success-bg: #E6F7EE;
+    --warning: #D97B1A;
+    --warning-bg: #FEF3E2;
+    --danger: #D63B3B;
+    --danger-bg: #FEECEC;
+    --info: #1A7ABD;
+    --info-bg: #E8F4FD;
+
+    --bg-base: #F2F4F8;
+    --bg-surface: #FFFFFF;
+    --bg-sidebar: #0D1B3E;
+    --bg-sidebar-hover: rgba(255,255,255,0.08);
+    --bg-sidebar-active: rgba(43,142,240,0.25);
+
+    --text-primary: #1A1E2D;
+    --text-secondary: #5A6278;
+    --text-muted: #9AA0B2;
+    --text-sidebar: rgba(255,255,255,0.75);
+    --text-sidebar-active: #FFFFFF;
+
+    --border: #E2E6EF;
+    --border-strong: #C8CFDE;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+
+    --font-display: 'Sora', 'Noto Sans SC', sans-serif;
+    --font-body: 'Noto Sans SC', 'Sora', sans-serif;
+
+    --sidebar-w: 220px;
+    --topbar-h: 58px;
+
+    --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  [data-theme="dark"] {
+    --bg-base: #0F1322;
+    --bg-surface: #1A2035;
+    --brand-light: #1A2A4F;
+    --brand-glow: rgba(43,142,240,0.15);
+    --text-primary: #E8ECF5;
+    --text-secondary: #8C93A8;
+    --text-muted: #5A6278;
+    --border: #2A3050;
+    --border-strong: #3A4560;
+    --success-bg: #0D2E1C;
+    --warning-bg: #2D2010;
+    --danger-bg: #2D1010;
+    --info-bg: #0D2030;
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  }
+
+  /* ============================================
+     RESET
+     ============================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ============================================
+     SIDEBAR
+     ============================================ */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg-sidebar);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 100;
+    transition: transform var(--transition);
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, #2B8EF0, #1A4FBD);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(43,142,240,0.4);
+  }
+  .logo-text {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+  .logo-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.05em;
+    margin-top: 1px;
+    font-family: var(--font-display);
+    font-weight: 300;
+  }
+  .sidebar-section { padding: 12px 12px 0; }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    padding: 4px 8px 8px;
+    font-family: var(--font-display);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--text-sidebar);
+    font-size: 13.5px;
+    transition: all var(--transition);
+    margin-bottom: 2px;
+    position: relative;
+    user-select: none;
+  }
+  .nav-item:hover {
+    background: var(--bg-sidebar-hover);
+    color: #fff;
+  }
+  .nav-item.active {
+    background: var(--bg-sidebar-active);
+    color: var(--text-sidebar-active);
+    font-weight: 500;
+  }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 3px; height: 20px;
+    background: var(--brand-accent);
+    border-radius: 0 3px 3px 0;
+  }
+  .nav-icon {
+    width: 20px; height: 20px;
+    opacity: 0.7;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-item.active .nav-icon,
+  .nav-item:hover .nav-icon { opacity: 1; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 100px;
+    font-family: var(--font-display);
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 12px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  .user-card:hover { background: var(--bg-sidebar-hover); }
+  .user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2B8EF0, #1A4FBD);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: #fff;
+    flex-shrink: 0;
+    font-family: var(--font-display);
+  }
+  .user-name { font-size: 13px; color: #fff; font-weight: 500; }
+  .user-role { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+  /* ============================================
+     MAIN LAYOUT
+     ============================================ */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    height: var(--topbar-h);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: var(--shadow-sm);
+  }
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .breadcrumb-sep { opacity: 0.5; }
+  .breadcrumb-current {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .topbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .topbar-btn {
+    width: 34px; height: 34px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    font-size: 16px;
+    position: relative;
+  }
+  .topbar-btn:hover {
+    background: var(--bg-base);
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+  }
+  .notif-dot {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 1.5px solid var(--bg-surface);
+  }
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    transition: all var(--transition);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .theme-toggle:hover { background: var(--bg-base); color: var(--text-primary); }
+
+  /* ============================================
+     PAGE CONTAINER
+     ============================================ */
+  .page {
+    padding: 24px;
+    display: none;
+  }
+  .page.active {
+    display: block;
+    animation: pageIn 0.35s ease forwards;
+  }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .page-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
+  /* ============================================
+     BUTTONS
+     ============================================ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all var(--transition);
+    font-family: var(--font-body);
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--brand-primary);
+    color: #fff;
+    border-color: var(--brand-primary);
+    box-shadow: 0 2px 8px rgba(26,79,189,0.3);
+  }
+  .btn-primary:hover {
+    background: var(--brand-deep);
+    border-color: var(--brand-deep);
+    box-shadow: 0 4px 14px rgba(26,79,189,0.4);
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  .btn-secondary:hover {
+    background: var(--bg-base);
+  }
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 12.5px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ============================================
+     STAT CARDS
+     ============================================ */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: cardIn 0.5s ease forwards;
+  }
+  .page.active .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .page.active .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .page.active .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .page.active .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .stat-card.c1::after { background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent)); }
+  .stat-card.c2::after { background: linear-gradient(90deg, var(--success), #2DD98A); }
+  .stat-card.c3::after { background: linear-gradient(90deg, var(--warning), #F5A623); }
+  .stat-card.c4::after { background: linear-gradient(90deg, #9B51E0, #C278FA); }
+
+  .stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  @keyframes cardIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .stat-label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-icon {
+    width: 28px; height: 28px;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .stat-icon.blue { background: var(--brand-light); color: var(--brand-primary); }
+  .stat-icon.green { background: var(--success-bg); color: var(--success); }
+  .stat-icon.amber { background: var(--warning-bg); color: var(--warning); }
+  .stat-icon.purple { background: #F3E8FE; color: #9B51E0; }
+  [data-theme="dark"] .stat-icon.purple { background: #2A1A40; }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .stat-change {
+    font-size: 12px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .stat-change.up { color: var(--success); }
+  .stat-change.down { color: var(--danger); }
+
+  /* ============================================
+     TAB BAR
+     ============================================ */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-base);
+    border-radius: var(--radius-lg);
+    padding: 4px;
+    margin-bottom: 20px;
+    width: fit-content;
+    border: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    font-family: var(--font-body);
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .tab-btn:hover { color: var(--text-primary); }
+  .tab-btn.active {
+    background: var(--bg-surface);
+    color: var(--brand-primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .tab-count {
+    background: var(--brand-light);
+    color: var(--brand-primary);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 100px;
+  }
+  .tab-btn.active .tab-count { background: var(--brand-primary); color: #fff; }
+
+  /* ============================================
+     FILTER BAR
+     ============================================ */
+  .filter-bar {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 140px;
+  }
+  .filter-label {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .filter-input, .filter-select {
+    flex: 1;
+    min-width: 0;
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 0 10px;
+    font-family: var(--font-body);
+    transition: border-color var(--transition);
+    outline: none;
+  }
+  .filter-input:focus, .filter-select:focus {
+    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 3px var(--brand-glow);
+  }
+  .filter-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  /* ============================================
+     TABLE
+     ============================================ */
+  .table-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    animation: cardIn 0.4s ease 0.25s both;
+  }
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1080px;
+  }
+  thead th {
+    background: var(--bg-base);
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    font-family: var(--font-display);
+  }
+  thead th:first-child { padding-left: 20px; }
+  thead th:last-child { padding-right: 20px; text-align: right; }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background var(--transition);
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg-base); }
+  tbody td {
+    padding: 13px 14px;
+    font-size: 13.5px;
+    color: var(--text-primary);
+    vertical-align: middle;
+  }
+  tbody td:first-child { padding-left: 20px; }
+  tbody td:last-child { padding-right: 20px; }
+
+  /* ============================================
+     BADGES & TAGS
+     ============================================ */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    font-family: var(--font-display);
+  }
+  .badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    border-radius: 50%;
+  }
+  .badge-upcoming { background: var(--info-bg); color: var(--info); }
+  .badge-upcoming::before { background: var(--info); }
+  .badge-ongoing { background: var(--success-bg); color: var(--success); }
+  .badge-ongoing::before { background: var(--success); animation: pulse 1.5s infinite; }
+  .badge-ended { background: var(--bg-base); color: var(--text-muted); }
+  .badge-ended::before { background: var(--text-muted); }
+  .badge-cancelled { background: var(--danger-bg); color: var(--danger); }
+  .badge-cancelled::before { background: var(--danger); }
+  .badge-processing { background: var(--warning-bg); color: var(--warning); }
+  .badge-processing::before { background: var(--warning); }
+  .badge-abnormal { background: var(--danger-bg); color: var(--danger); }
+  .badge-abnormal::before { background: var(--danger); }
+  .badge-active { background: var(--success-bg); color: var(--success); }
+  .badge-active::before { background: var(--success); }
+  .badge-leave { background: var(--warning-bg); color: var(--warning); }
+  .badge-leave::before { background: var(--warning); }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 500;
+    background: var(--brand-light);
+    color: var(--brand-primary);
+    font-family: var(--font-display);
+  }
+  .tag.group { background: #F3E8FE; color: #9B51E0; }
+  [data-theme="dark"] .tag.group { background: #2A1A40; }
+  .tag.private { background: var(--warning-bg); color: var(--warning); }
+  .tag.experience { background: var(--success-bg); color: var(--success); }
+  .tag.level-S { background: linear-gradient(135deg, #FFE082, #FFC107); color: #6B4D00; }
+  .tag.level-A { background: var(--brand-light); color: var(--brand-primary); }
+  .tag.level-B { background: var(--success-bg); color: var(--success); }
+  .tag.level-C { background: var(--bg-base); color: var(--text-secondary); }
+
+  .debit-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-weight: 500;
+    font-family: var(--font-display);
+  }
+  .debit-pending { background: var(--warning-bg); color: var(--warning); }
+  .debit-ok { background: var(--success-bg); color: var(--success); }
+  .debit-fail { background: var(--danger-bg); color: var(--danger); }
+  .debit-none { background: var(--bg-base); color: var(--text-muted); }
+
+  /* ============================================
+     NAME CELL & AVATAR
+     ============================================ */
+  .name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mini-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2B8EF0, #9B51E0);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: #fff;
+    flex-shrink: 0;
+    font-family: var(--font-display);
+  }
+  .mini-avatar.green { background: linear-gradient(135deg, #1A9C5B, #2DD98A); }
+  .mini-avatar.amber { background: linear-gradient(135deg, #D97B1A, #F5A623); }
+  .mini-avatar.pink { background: linear-gradient(135deg, #D63B3B, #F06292); }
+  .mini-avatar.teal { background: linear-gradient(135deg, #1A7ABD, #2BB3E0); }
+
+  /* ============================================
+     ACTION BUTTONS
+     ============================================ */
+  .action-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+  .action-btn {
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    font-family: var(--font-body);
+    white-space: nowrap;
+  }
+  .action-btn:hover {
+    background: var(--bg-base);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  .action-btn.primary {
+    border-color: transparent;
+    background: var(--brand-light);
+    color: var(--brand-primary);
+  }
+  .action-btn.primary:hover {
+    background: var(--brand-primary);
+    color: #fff;
+  }
+  .action-btn.danger {
+    border-color: transparent;
+    background: transparent;
+    color: var(--text-muted);
+  }
+  .action-btn.danger:hover {
+    background: var(--danger-bg);
+    color: var(--danger);
+  }
+
+  /* ============================================
+     TABLE FOOTER & PAGINATION
+     ============================================ */
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .page-btn {
+    min-width: 30px; height: 30px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+  .page-btn:hover { background: var(--bg-base); color: var(--text-primary); }
+  .page-btn.active {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: #fff;
+  }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ============================================
+     MODAL
+     ============================================ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 12px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-panel {
+    width: 580px;
+    max-width: calc(100vw - 24px);
+    background: var(--bg-surface);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    height: calc(100vh - 24px);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    overflow: hidden;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(30px) scale(0.96); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  .modal-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .modal-title { font-size: 16px; font-weight: 700; color: var(--text-primary); font-family: var(--font-display); }
+  .modal-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+  .modal-close {
+    margin-left: auto;
+    width: 30px; height: 30px;
+    border: none;
+    background: var(--bg-base);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 16px;
+    transition: all var(--transition);
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: var(--danger-bg); color: var(--danger); }
+  .modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .modal-footer {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  .detail-section { margin-bottom: 24px; }
+  .detail-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-display);
+  }
+  .detail-section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .detail-field {
+    padding: 10px 12px;
+    background: var(--bg-base);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+  .detail-field-label {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+  .detail-field-value {
+    font-size: 13.5px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .student-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    transition: background var(--transition);
+    flex-wrap: wrap;
+  }
+  .student-row:hover { background: var(--bg-base); }
+  .student-info { flex: 1; min-width: 0; }
+  .student-name { font-size: 13.5px; font-weight: 500; }
+  .student-phone { font-size: 12px; color: var(--text-muted); }
+  .student-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+  .drawer-wide .modal-panel { width: 860px; }
+  .section-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .section-note {
+    color: var(--text-muted);
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .detail-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    overflow-x: auto;
+  }
+  .detail-tab {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    font-size: 12.5px;
+    cursor: default;
+    white-space: nowrap;
+    font-family: var(--font-body);
+  }
+  .detail-tab.active {
+    background: var(--bg-surface);
+    color: var(--brand-primary);
+    box-shadow: var(--shadow-sm);
+    font-weight: 600;
+  }
+  .rule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .rule-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 15px 16px;
+  }
+  .rule-card-title {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .rule-card-text {
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .inline-list {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .mini-table {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .mini-table th,
+  .mini-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    vertical-align: middle;
+  }
+  .mini-table th {
+    background: var(--bg-base);
+    color: var(--text-muted);
+    font-size: 11.5px;
+    font-family: var(--font-display);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .mini-table td:last-child,
+  .mini-table th:last-child { text-align: left; padding-right: 12px; }
+  .split-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .workflow {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+  .workflow-step {
+    flex: 1;
+    min-width: 150px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    background: var(--bg-surface);
+  }
+  .workflow-step strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .workflow-step span {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .permission-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    background: var(--bg-surface);
+    margin-bottom: 16px;
+  }
+  .permission-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  /* ============================================
+     ALERT
+     ============================================ */
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    margin-bottom: 16px;
+    border-left: 3px solid;
+    animation: cardIn 0.4s ease 0.1s both;
+  }
+  .alert-warning {
+    background: var(--warning-bg);
+    color: var(--warning);
+    border-color: var(--warning);
+  }
+  .alert-danger {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  .alert-icon { font-size: 16px; flex-shrink: 0; }
+  .alert-text { flex: 1; }
+  .alert-action {
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ============================================
+     EMPTY STATE
+     ============================================ */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-text { font-size: 14px; }
+
+  /* ============================================
+     CARD GRID (for coach / student grid view)
+     ============================================ */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .person-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    transition: all var(--transition);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: cardIn 0.4s ease forwards;
+  }
+  .person-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+  }
+  .person-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .large-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2B8EF0, #9B51E0);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+    font-family: var(--font-display);
+  }
+  .person-card .person-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .person-card .person-meta {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .person-card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .person-stat-item {
+    text-align: center;
+  }
+  .person-stat-value {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .person-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ============================================
+     MOBILE
+     ============================================ */
+  .mobile-menu-btn {
+    display: none;
+    width: 34px; height: 34px;
+    border: 1px solid var(--border);
+    background: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    align-items: center; justify-content: center;
+    font-size: 18px;
+    color: var(--text-secondary);
+  }
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99;
+  }
+
+  @media (max-width: 1100px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .split-layout { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-overlay.open { display: block; }
+    .main { margin-left: 0; }
+    .mobile-menu-btn { display: flex; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .page { padding: 16px; }
+    .modal-panel {
+      width: 100%; height: 90vh; align-self: flex-end;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+  }
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+    .filter-divider { display: none; }
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 100px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* Level chip */
+  .level-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: var(--font-display);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     SIDEBAR
+     ============================================ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">掌</div>
+    <div>
+      <div class="logo-text">馆掌</div>
+      <div class="logo-sub">GYM MANAGEMENT</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section" style="margin-top:8px;">
+    <div class="sidebar-label">培训</div>
+
+    <div class="nav-item active" data-page="booking" onclick="switchPage('booking')">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18">
+          <rect x="2" y="3" width="16" height="14" rx="2"/>
+          <path d="M6 2v2M14 2v2M2 8h16"/>
+        </svg>
+      </span>
+      约课管理
+      <span class="nav-badge">3</span>
+    </div>
+
+    <div class="nav-item" data-page="course" onclick="switchPage('course')">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18">
+          <path d="M10 2L2 6l8 4 8-4-8-4z"/>
+          <path d="M2 10l8 4 8-4"/>
+          <path d="M2 14l8 4 8-4"/>
+        </svg>
+      </span>
+      课程管理
+    </div>
+
+    <div class="nav-item" data-page="course-level" onclick="switchPage('course-level')">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18">
+          <path d="M4 16V8M10 16V4M16 16v-6"/>
+          <path d="M2 16h16"/>
+        </svg>
+      </span>
+      课程等级
+    </div>
+
+    <div class="nav-item" data-page="card" onclick="switchPage('card')">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18">
+          <rect x="1" y="4" width="18" height="12" rx="2"/>
+          <path d="M1 8h18"/>
+          <path d="M5 13h3"/>
+        </svg>
+      </span>
+      课程卡管理
+    </div>
+
+    <div class="nav-item" data-page="student" onclick="switchPage('student')">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18">
+          <circle cx="8" cy="6" r="3"/>
+          <path d="M2 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+          <path d="M15 8l2 2 3-3"/>
+        </svg>
+      </span>
+      学员管理
+    </div>
+
+    <div class="nav-item" data-page="coach" onclick="switchPage('coach')">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18">
+          <circle cx="10" cy="6" r="3"/>
+          <path d="M4 17c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+          <path d="M10 12v5M8 15h4"/>
+        </svg>
+      </span>
+      教练管理
+    </div>
+
+    <div class="nav-item" data-page="coach-level" onclick="switchPage('coach-level')">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18">
+          <path d="M10 2l2.2 4.5 5 .7-3.6 3.5.8 5-4.4-2.4-4.4 2.4.8-5L2.8 7.2l5-.7L10 2z"/>
+        </svg>
+      </span>
+      教练等级
+    </div>
+
+    <div class="nav-item" data-page="logs" onclick="switchPage('logs')">
+      <span class="nav-icon">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="18" height="18">
+          <path d="M5 3h10a2 2 0 012 2v12H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+          <path d="M7 7h6M7 10h6M7 13h4"/>
+        </svg>
+      </span>
+      操作日志
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">管</div>
+      <div>
+        <div class="user-name">管理员</div>
+        <div class="user-role">超级管理员 · 总店</div>
+      </div>
+    </div>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ============================================
+     MAIN
+     ============================================ -->
+<div class="main">
+  <header class="topbar">
+    <button class="mobile-menu-btn" onclick="openSidebar()">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18">
+        <path d="M2 5h16M2 10h16M2 15h16"/>
+      </svg>
+    </button>
+    <div class="breadcrumb">
+      <span>培训</span>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current" id="breadcrumbCurrent">约课管理</span>
+    </div>
+    <div class="topbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="14" height="14">
+          <circle cx="10" cy="10" r="4"/>
+          <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.9 4.9l1.4 1.4M13.7 13.7l1.4 1.4M4.9 15.1l1.4-1.4M13.7 6.3l1.4-1.4"/>
+        </svg>
+        <span id="themeLabel">暗色</span>
+      </button>
+      <button class="topbar-btn">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" width="16" height="16">
+          <path d="M10 2a6 6 0 00-6 6v3l-2 2h16l-2-2V8a6 6 0 00-6-6z"/>
+          <path d="M8 16a2 2 0 004 0"/>
+        </svg>
+        <span class="notif-dot"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ====== PAGE: 约课管理 ====== -->
+  <div class="page active" id="page-booking">
+    <div class="alert alert-danger">
+      <span class="alert-icon">⚠</span>
+      <span class="alert-text">存在 <strong>2</strong> 条取消异常记录（退款失败），需人工处理</span>
+      <span class="alert-action">立即处理 →</span>
+    </div>
+    <div class="alert alert-warning">
+      <span class="alert-icon">◷</span>
+      <span class="alert-text">存在 <strong>5</strong> 条待扣费记录（已签到但未扣费超过 24 小时）</span>
+      <span class="alert-action">查看详情 →</span>
+    </div>
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">约课管理</div>
+        <div class="page-subtitle">管理所有课程预约记录，处理学员签到、扣费与教练排班</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">导出</button>
+        <button class="btn btn-primary" onclick="openBookingDetail(null)">+ 新建约课</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card c1">
+        <div class="stat-label"><div class="stat-icon blue">📅</div>今日约课</div>
+        <div><div class="stat-value">24</div><div class="stat-change up">↑ 4 较昨日</div></div>
+      </div>
+      <div class="stat-card c2">
+        <div class="stat-label"><div class="stat-icon green">✓</div>今日签到</div>
+        <div><div class="stat-value">18</div><div class="stat-change up">签到率 75%</div></div>
+      </div>
+      <div class="stat-card c3">
+        <div class="stat-label"><div class="stat-icon amber">◷</div>待扣费</div>
+        <div><div class="stat-value">5</div><div class="stat-change down">需尽快处理</div></div>
+      </div>
+      <div class="stat-card c4">
+        <div class="stat-label"><div class="stat-icon purple">✕</div>取消异常</div>
+        <div><div class="stat-value">2</div><div class="stat-change down">退款失败</div></div>
+      </div>
+    </div>
+
+    <div class="tab-bar" id="bookingTabs">
+      <button class="tab-btn active" data-tab="all">全部 <span class="tab-count">12</span></button>
+      <button class="tab-btn" data-tab="upcoming">待上课 <span class="tab-count">3</span></button>
+      <button class="tab-btn" data-tab="ongoing">正在上课 <span class="tab-count">2</span></button>
+      <button class="tab-btn" data-tab="ended">已结束 <span class="tab-count">5</span></button>
+      <button class="tab-btn" data-tab="cancelled">已取消 <span class="tab-count">2</span></button>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item" style="flex:1.5;min-width:180px;">
+        <span class="filter-label">搜索</span>
+        <input class="filter-input" placeholder="课程名 / 教练 / 学员" id="bookingSearch">
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">类型</span>
+        <select class="filter-select" id="bookingType">
+          <option value="">全部</option>
+          <option value="group">团课</option>
+          <option value="private">私教课</option>
+          <option value="experience">体验课</option>
+        </select>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">日期</span>
+        <input class="filter-input" type="date" id="bookingDate" style="min-width:130px;">
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="resetBookingFilters()">重置</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>课程日期</th>
+              <th>开始 / 结束</th>
+              <th>场地 / 项目</th>
+              <th>类型</th>
+              <th>课时来源</th>
+              <th>剩余课次</th>
+              <th>课程名</th>
+              <th>主教练</th>
+              <th>学员</th>
+              <th>课程状态</th>
+              <th>取消状态</th>
+              <th>待扣费</th>
+              <th>创建时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="bookingTbody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="bookingCount" style="color:var(--text-muted);font-size:12.5px;"></span>
+        <div class="pagination" id="bookingPagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: 学员管理 ====== -->
+  <div class="page" id="page-student">
+    <div class="page-header">
+      <div>
+        <div class="page-title">学员管理</div>
+        <div class="page-subtitle">查看、搜索和管理所有学员档案、权益与订单</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">导出</button>
+        <button class="btn btn-primary" onclick="alert('新增学员')">+ 新增学员</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card c1">
+        <div class="stat-label"><div class="stat-icon blue">👥</div>学员总数</div>
+        <div><div class="stat-value">486</div><div class="stat-change up">↑ 12 本月</div></div>
+      </div>
+      <div class="stat-card c2">
+        <div class="stat-label"><div class="stat-icon green">✓</div>活跃学员</div>
+        <div><div class="stat-value">312</div><div class="stat-change up">活跃率 64%</div></div>
+      </div>
+      <div class="stat-card c3">
+        <div class="stat-label"><div class="stat-icon amber">⏰</div>即将到期</div>
+        <div><div class="stat-value">28</div><div class="stat-change down">15天内</div></div>
+      </div>
+      <div class="stat-card c4">
+        <div class="stat-label"><div class="stat-icon purple">★</div>新增本月</div>
+        <div><div class="stat-value">12</div><div class="stat-change up">较上月 +3</div></div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item" style="flex:1.5;min-width:180px;">
+        <span class="filter-label">搜索</span>
+        <input class="filter-input" placeholder="姓名 / 手机号" id="studentSearch">
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">负责教练</span>
+        <select class="filter-select" id="studentCoach">
+          <option value="">全部</option>
+          <option>陈俊峰</option>
+          <option>李薇</option>
+          <option>张晓云</option>
+          <option>王海</option>
+          <option>刘强</option>
+        </select>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">会员状态</span>
+        <select class="filter-select" id="studentStatus">
+          <option value="">全部</option>
+          <option value="active">正常</option>
+          <option value="expiring">即将到期</option>
+          <option value="expired">已过期</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="resetStudentFilters()">重置</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>姓名</th>
+              <th>手机号</th>
+              <th>性别</th>
+              <th>负责教练</th>
+              <th>课程卡</th>
+              <th>会员状态</th>
+              <th>注册时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="studentTbody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="studentCount" style="color:var(--text-muted);font-size:12.5px;"></span>
+        <div class="pagination" id="studentPagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: 教练管理 ====== -->
+  <div class="page" id="page-coach">
+    <div class="page-header">
+      <div>
+        <div class="page-title">教练管理</div>
+        <div class="page-subtitle">管理教练档案、等级、排班与上课记录</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="switchPage('coach-level')">等级管理</button>
+        <button class="btn btn-primary" onclick="alert('新增教练')">+ 新增教练</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card c1">
+        <div class="stat-label"><div class="stat-icon blue">🏋</div>教练总数</div>
+        <div><div class="stat-value">18</div><div class="stat-change up">在职 16 人</div></div>
+      </div>
+      <div class="stat-card c2">
+        <div class="stat-label"><div class="stat-icon green">✓</div>本月授课</div>
+        <div><div class="stat-value">462</div><div class="stat-change up">课时数</div></div>
+      </div>
+      <div class="stat-card c3">
+        <div class="stat-label"><div class="stat-icon amber">★</div>S级教练</div>
+        <div><div class="stat-value">3</div><div class="stat-change up">资深</div></div>
+      </div>
+      <div class="stat-card c4">
+        <div class="stat-label"><div class="stat-icon purple">⭐</div>平均评分</div>
+        <div><div class="stat-value">4.7</div><div class="stat-change up">满分 5.0</div></div>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item" style="flex:1.5;min-width:180px;">
+        <span class="filter-label">搜索</span>
+        <input class="filter-input" placeholder="姓名 / 手机号" id="coachSearch">
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">等级</span>
+        <select class="filter-select" id="coachLevel">
+          <option value="">全部</option>
+          <option value="S">S 级</option>
+          <option value="A">A 级</option>
+          <option value="B">B 级</option>
+          <option value="C">C 级</option>
+        </select>
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">在职状态</span>
+        <select class="filter-select" id="coachStatus">
+          <option value="">全部</option>
+          <option value="active">在职</option>
+          <option value="leave">离职</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="resetCoachFilters()">重置</button>
+    </div>
+
+    <div class="card-grid" id="coachGrid"></div>
+  </div>
+
+  <!-- ====== PAGE: 课程管理 ====== -->
+  <div class="page" id="page-course">
+    <div class="page-header">
+      <div>
+        <div class="page-title">课程管理</div>
+        <div class="page-subtitle">管理课程库，配置课程等级、关联项目和教练</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary" onclick="switchPage('course-level')">课程等级</button>
+        <button class="btn btn-primary" onclick="alert('新增课程')">+ 新增课程</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item" style="flex:1.5;min-width:180px;">
+        <span class="filter-label">搜索</span>
+        <input class="filter-input" placeholder="课程名称" id="courseSearch">
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">类型</span>
+        <select class="filter-select" id="courseType">
+          <option value="">全部</option>
+          <option value="group">团课</option>
+          <option value="private">私教课</option>
+          <option value="experience">体验课</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="resetCourseFilters()">重置</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>课程名称</th>
+              <th>课程类型</th>
+              <th>关联项目</th>
+              <th>课程等级</th>
+              <th>时长</th>
+              <th>最大人数</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="courseTbody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="courseCount" style="color:var(--text-muted);font-size:12.5px;"></span>
+        <div class="pagination" id="coursePagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: 课程卡管理 ====== -->
+  <div class="page" id="page-card">
+    <div class="page-header">
+      <div>
+        <div class="page-title">课程卡管理</div>
+        <div class="page-subtitle">配置课程卡，支持按等级动态匹配或指定课程固定适用</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">导出</button>
+        <button class="btn btn-primary" onclick="alert('新增课程卡')">+ 新增课程卡</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item" style="flex:1.5;min-width:180px;">
+        <span class="filter-label">搜索</span>
+        <input class="filter-input" placeholder="课程卡名称" id="cardSearch">
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">适用方式</span>
+        <select class="filter-select" id="cardMode">
+          <option value="">全部</option>
+          <option value="level">按课程等级动态匹配</option>
+          <option value="fixed">指定课程固定适用</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="resetCardFilters()">重置</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>课程卡名称</th>
+              <th>关联项目</th>
+              <th>适用方式</th>
+              <th>总次数</th>
+              <th>有效期</th>
+              <th>售价</th>
+              <th>已售</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="cardTbody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span id="cardCount" style="color:var(--text-muted);font-size:12.5px;"></span>
+        <div class="pagination" id="cardPagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: 课程等级 ====== -->
+  <div class="page" id="page-course-level">
+    <div class="page-header">
+      <div>
+        <div class="page-title">课程等级</div>
+        <div class="page-subtitle">按项目维护课程等级，课程卡可按等级动态匹配适用课程</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">导出</button>
+        <button class="btn btn-primary" onclick="openCourseLevelDetail()">+ 新增等级</button>
+      </div>
+    </div>
+
+    <div class="rule-grid">
+      <div class="rule-card">
+        <div class="rule-card-title">唯一性规则</div>
+        <div class="rule-card-text">同一项目下等级名称不可重复；不同项目可使用相同等级名称，删除前需校验是否已有课程引用。</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-title">课程联动</div>
+        <div class="rule-card-text">新增或编辑课程时选择课程等级，课程卡按等级匹配时自动纳入符合项目与等级的课程。</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-title">删除限制</div>
+        <div class="rule-card-text">已被课程使用的等级不可直接删除；需先调整相关课程等级并写入操作日志。</div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>等级名称</th>
+              <th>关联项目</th>
+              <th>排序</th>
+              <th>关联课程数</th>
+              <th>课程卡引用</th>
+              <th>状态</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="courseLevelTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: 教练等级 ====== -->
+  <div class="page" id="page-coach-level">
+    <div class="page-header">
+      <div>
+        <div class="page-title">教练等级</div>
+        <div class="page-subtitle">维护教练等级，新增 / 编辑教练时选择等级并同步展示到详情页</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">导出</button>
+        <button class="btn btn-primary" onclick="openCoachLevelDetail()">+ 新增等级</button>
+      </div>
+    </div>
+
+    <div class="rule-grid">
+      <div class="rule-card">
+        <div class="rule-card-title">基础规则</div>
+        <div class="rule-card-text">等级用于教练展示、筛选和统计归类；修改教练等级需记录修改前后状态。</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-title">离职不清空</div>
+        <div class="rule-card-text">教练离职后历史课程、订单、上课记录保留原教练和等级快照。</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-title">异常提示</div>
+        <div class="rule-card-text">等级名称为空、重复或被使用时阻断保存 / 删除，并提示管理员处理。</div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>等级</th>
+              <th>等级说明</th>
+              <th>教练数</th>
+              <th>默认课时系数</th>
+              <th>状态</th>
+              <th>更新时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="coachLevelTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== PAGE: 操作日志 ====== -->
+  <div class="page" id="page-logs">
+    <div class="page-header">
+      <div>
+        <div class="page-title">操作日志</div>
+        <div class="page-subtitle">追踪培训后台关键操作、失败原因、状态变更与统计影响范围</div>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-secondary">导出</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-item" style="flex:1.5;min-width:180px;">
+        <span class="filter-label">搜索</span>
+        <input class="filter-input" placeholder="操作人 / 对象 / 失败原因" id="logSearch">
+      </div>
+      <div class="filter-divider"></div>
+      <div class="filter-item">
+        <span class="filter-label">模块</span>
+        <select class="filter-select" id="logModule">
+          <option value="">全部</option>
+          <option>约课管理</option>
+          <option>课程等级</option>
+          <option>课程卡</option>
+          <option>学员管理</option>
+          <option>教练管理</option>
+          <option>财务</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="resetLogFilters()">重置</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>模块</th>
+              <th>操作</th>
+              <th>操作人</th>
+              <th>操作对象</th>
+              <th>操作前</th>
+              <th>操作后</th>
+              <th>失败原因 / 影响范围</th>
+            </tr>
+          </thead>
+          <tbody id="logTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ============================================
+     MODAL
+     ============================================ -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">详情</div>
+        <div class="modal-sub" id="modalSub"></div>
+      </div>
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeDetail()">关闭</button>
+      <button class="btn btn-primary" id="modalAction">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================
+   PAGE ROUTING
+   ============================================ */
+const PAGE_LABELS = {
+  booking: '约课管理',
+  student: '学员管理',
+  coach: '教练管理',
+  course: '课程管理',
+  card: '课程卡管理',
+  'coach-level': '教练等级',
+  'course-level': '课程等级',
+  logs: '操作日志',
+};
+
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + page);
+  if (target) target.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navEl = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (navEl) navEl.classList.add('active');
+
+  document.getElementById('breadcrumbCurrent').textContent = PAGE_LABELS[page] || page;
+  closeSidebar();
+
+  // Render data
+  if (page === 'booking') renderBookings();
+  if (page === 'student') renderStudents();
+  if (page === 'coach') renderCoaches();
+  if (page === 'course') renderCourses();
+  if (page === 'card') renderCards();
+  if (page === 'course-level') renderCourseLevels();
+  if (page === 'coach-level') renderCoachLevels();
+  if (page === 'logs') renderLogs();
+}
+
+/* ============================================
+   SIDEBAR & THEME
+   ============================================ */
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+let isDark = false;
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.setAttribute('data-theme', isDark ? 'dark' : '');
+  document.getElementById('themeLabel').textContent = isDark ? '亮色' : '暗色';
+}
+
+/* ============================================
+   DATA
+   ============================================ */
+const bookingData = [
+  { id:1, name:'核心力量塑造', date:'2026-05-18', start:'09:00', end:'10:00', venue:'A场地', project:'力量训练', type:'group', source:'周期性约课', remaining:8, coach:'陈俊峰', students:8, maxStudents:12, status:'ongoing', cancelStatus:'normal', pendingDebit:2, createdAt:'2026-05-12 18:20' },
+  { id:2, name:'私教体能评估', date:'2026-05-18', start:'10:30', end:'11:30', venue:'B场地', project:'私教', type:'private', source:'单次约课', remaining:'/', coach:'李薇', students:1, maxStudents:1, status:'ongoing', cancelStatus:'normal', pendingDebit:0, createdAt:'2026-05-17 12:04' },
+  { id:3, name:'瑜伽塑形班', date:'2026-05-18', start:'14:00', end:'15:30', venue:'C场地', project:'瑜伽', type:'group', source:'周期性约课', remaining:11, coach:'张晓云', students:10, maxStudents:15, status:'upcoming', cancelStatus:'normal', pendingDebit:0, createdAt:'2026-05-10 09:18' },
+  { id:4, name:'HIIT 燃脂训练', date:'2026-05-18', start:'16:00', end:'17:00', venue:'A场地', project:'有氧训练', type:'group', source:'单次约课', remaining:'/', coach:'陈俊峰', students:6, maxStudents:10, status:'upcoming', cancelStatus:'normal', pendingDebit:0, createdAt:'2026-05-16 15:33' },
+  { id:5, name:'体验课 - 游泳初级', date:'2026-05-17', start:'09:00', end:'10:00', venue:'泳池', project:'游泳', type:'experience', source:'单次约课', remaining:'/', coach:'王海', students:2, maxStudents:4, status:'ended', cancelStatus:'normal', pendingDebit:1, createdAt:'2026-05-15 20:40' },
+  { id:6, name:'拳击基础班', date:'2026-05-17', start:'11:00', end:'12:30', venue:'B场地', project:'拳击', type:'group', source:'周期性约课', remaining:4, coach:'刘强', students:7, maxStudents:12, status:'ended', cancelStatus:'normal', pendingDebit:2, createdAt:'2026-05-01 10:06' },
+  { id:7, name:'私教 - 减脂塑形', date:'2026-05-16', start:'09:00', end:'10:00', venue:'C场地', project:'私教', type:'private', source:'单次约课', remaining:'/', coach:'李薇', students:1, maxStudents:1, status:'ended', cancelStatus:'abnormal', pendingDebit:0, createdAt:'2026-05-14 11:16' },
+  { id:8, name:'周末早安健身', date:'2026-05-16', start:'07:30', end:'08:30', venue:'A场地', project:'综合', type:'group', source:'周期性约课', remaining:6, coach:'陈俊峰', students:9, maxStudents:15, status:'cancelled', cancelStatus:'processing', pendingDebit:0, createdAt:'2026-04-28 08:30' },
+  { id:9, name:'普拉提核心', date:'2026-05-15', start:'10:00', end:'11:00', venue:'C场地', project:'普拉提', type:'group', source:'周期性约课', remaining:2, coach:'张晓云', students:8, maxStudents:12, status:'ended', cancelStatus:'normal', pendingDebit:0, createdAt:'2026-04-30 14:50' },
+  { id:10, name:'儿童游泳入门', date:'2026-05-15', start:'15:00', end:'16:00', venue:'泳池', project:'游泳', type:'experience', source:'单次约课', remaining:'/', coach:'王海', students:3, maxStudents:6, status:'ended', cancelStatus:'normal', pendingDebit:0, createdAt:'2026-05-12 09:25' },
+  { id:11, name:'高级私教体能', date:'2026-05-14', start:'09:30', end:'11:00', venue:'B场地', project:'私教', type:'private', source:'单次约课', remaining:'/', coach:'刘强', students:1, maxStudents:1, status:'cancelled', cancelStatus:'cancelled', pendingDebit:0, createdAt:'2026-05-13 18:18' },
+  { id:12, name:'有氧搏击', date:'2026-05-14', start:'18:00', end:'19:30', venue:'A场地', project:'拳击', type:'group', source:'周期性约课', remaining:1, coach:'陈俊峰', students:11, maxStudents:15, status:'ended', cancelStatus:'normal', pendingDebit:0, createdAt:'2026-05-01 10:22' },
+];
+
+const studentData = [
+  { id:1, name:'王小明', phone:'138****5621', gender:'男', coach:'陈俊峰', cards:'核心训练卡 12次', cardRemain:'剩余 8 次', status:'active', joinDate:'2024-08-15' },
+  { id:2, name:'李晓彤', phone:'139****7832', gender:'女', coach:'张晓云', cards:'瑜伽月卡', cardRemain:'剩余 18 天', status:'active', joinDate:'2024-09-22' },
+  { id:3, name:'张伟', phone:'135****9012', gender:'男', coach:'李薇', cards:'私教 20 次卡', cardRemain:'剩余 3 次', status:'expiring', joinDate:'2024-06-08' },
+  { id:4, name:'刘婷', phone:'186****3345', gender:'女', coach:'王海', cards:'游泳次卡', cardRemain:'剩余 10 次', status:'active', joinDate:'2024-11-30' },
+  { id:5, name:'陈建国', phone:'177****6689', gender:'男', coach:'陈俊峰', cards:'综合年卡', cardRemain:'剩余 6 天', status:'expiring', joinDate:'2024-05-12' },
+  { id:6, name:'赵雅', phone:'152****4421', gender:'女', coach:'张晓云', cards:'瑜伽季卡', cardRemain:'剩余 45 天', status:'active', joinDate:'2024-10-15' },
+  { id:7, name:'孙浩', phone:'189****1234', gender:'男', coach:'刘强', cards:'拳击次卡', cardRemain:'已过期', status:'expired', joinDate:'2024-03-20' },
+  { id:8, name:'周明', phone:'136****8876', gender:'男', coach:'李薇', cards:'私教 10 次卡', cardRemain:'剩余 5 次', status:'active', joinDate:'2025-01-08' },
+  { id:9, name:'吴秀英', phone:'176****2210', gender:'女', coach:'王海', cards:'综合月卡', cardRemain:'剩余 22 天', status:'active', joinDate:'2024-12-01' },
+  { id:10, name:'郑文俊', phone:'159****8843', gender:'男', coach:'陈俊峰', cards:'核心训练卡 24次', cardRemain:'剩余 19 次', status:'active', joinDate:'2025-02-14' },
+];
+
+const coachData = [
+  { id:1, name:'陈俊峰', phone:'138****1111', level:'S', gender:'男', skills:'核心训练 / HIIT / 力量', courses:24, students:78, hours:186, status:'active' },
+  { id:2, name:'李薇', phone:'138****2222', level:'A', gender:'女', skills:'私教 / 减脂塑形 / 普拉提', courses:18, students:42, hours:142, status:'active' },
+  { id:3, name:'张晓云', phone:'138****3333', level:'A', gender:'女', skills:'瑜伽 / 普拉提 / 拉伸', courses:22, students:65, hours:168, status:'active' },
+  { id:4, name:'王海', phone:'138****4444', level:'B', gender:'男', skills:'游泳 / 救生 / 儿童体能', courses:16, students:38, hours:120, status:'active' },
+  { id:5, name:'刘强', phone:'138****5555', level:'S', gender:'男', skills:'拳击 / 搏击 / 体能', courses:20, students:52, hours:158, status:'active' },
+  { id:6, name:'孙小雨', phone:'138****6666', level:'B', gender:'女', skills:'舞蹈 / 有氧操', courses:14, students:33, hours:96, status:'active' },
+  { id:7, name:'赵明', phone:'138****7777', level:'C', gender:'男', skills:'体能训练 / 助教', courses:8, students:18, hours:64, status:'active' },
+  { id:8, name:'周丽华', phone:'138****8888', level:'A', gender:'女', skills:'瑜伽 / 冥想 / 拉伸', courses:19, students:48, hours:144, status:'active' },
+  { id:9, name:'吴建民', phone:'138****9999', level:'B', gender:'男', skills:'器械训练 / 增肌', courses:12, students:28, hours:88, status:'leave' },
+];
+
+const courseData = [
+  { id:1, name:'核心力量塑造', type:'group', project:'力量训练', level:'A', duration:60, max:12, status:'active' },
+  { id:2, name:'HIIT 燃脂训练', type:'group', project:'有氧训练', level:'B', duration:50, max:10, status:'active' },
+  { id:3, name:'瑜伽塑形班', type:'group', project:'瑜伽', level:'A', duration:90, max:15, status:'active' },
+  { id:4, name:'普拉提核心', type:'group', project:'普拉提', level:'A', duration:60, max:12, status:'active' },
+  { id:5, name:'私教体能评估', type:'private', project:'私教', level:'S', duration:60, max:1, status:'active' },
+  { id:6, name:'私教 - 减脂塑形', type:'private', project:'私教', level:'A', duration:60, max:1, status:'active' },
+  { id:7, name:'体验课 - 游泳初级', type:'experience', project:'游泳', level:'C', duration:60, max:4, status:'active' },
+  { id:8, name:'儿童游泳入门', type:'experience', project:'游泳', level:'C', duration:60, max:6, status:'active' },
+  { id:9, name:'拳击基础班', type:'group', project:'拳击', level:'B', duration:90, max:12, status:'active' },
+  { id:10, name:'有氧搏击', type:'group', project:'拳击', level:'B', duration:90, max:15, status:'active' },
+];
+
+const cardData = [
+  { id:1, name:'核心训练 12 次卡', project:'力量训练', mode:'level', times:12, validity:'90 天', price:'¥1,680', sold:142, status:'active' },
+  { id:2, name:'瑜伽月卡', project:'瑜伽', mode:'level', times:30, validity:'30 天', price:'¥680', sold:96, status:'active' },
+  { id:3, name:'瑜伽季卡', project:'瑜伽', mode:'level', times:90, validity:'90 天', price:'¥1,880', sold:54, status:'active' },
+  { id:4, name:'私教 20 次卡', project:'私教', mode:'fixed', times:20, validity:'180 天', price:'¥5,200', sold:38, status:'active' },
+  { id:5, name:'私教 10 次卡', project:'私教', mode:'fixed', times:10, validity:'120 天', price:'¥2,800', sold:62, status:'active' },
+  { id:6, name:'游泳次卡', project:'游泳', mode:'level', times:10, validity:'180 天', price:'¥780', sold:28, status:'active' },
+  { id:7, name:'综合年卡', project:'综合', mode:'level', times:'不限', validity:'365 天', price:'¥4,800', sold:84, status:'active' },
+  { id:8, name:'综合月卡', project:'综合', mode:'level', times:'不限', validity:'30 天', price:'¥580', sold:112, status:'active' },
+  { id:9, name:'拳击次卡', project:'拳击', mode:'level', times:15, validity:'120 天', price:'¥1,280', sold:34, status:'active' },
+];
+
+const courseLevelData = [
+  { id:1, name:'S 级', project:'私教', sort:1, courses:2, cards:2, status:'active', updatedAt:'2026-05-10 09:30' },
+  { id:2, name:'A 级', project:'力量训练', sort:2, courses:4, cards:3, status:'active', updatedAt:'2026-05-11 14:02' },
+  { id:3, name:'B 级', project:'拳击', sort:3, courses:3, cards:2, status:'active', updatedAt:'2026-05-12 16:18' },
+  { id:4, name:'C 级', project:'游泳', sort:4, courses:2, cards:1, status:'active', updatedAt:'2026-05-13 10:20' },
+];
+
+const coachLevelData = [
+  { id:1, level:'S', desc:'资深教练，可承担核心课程与总教练协同', coaches:3, ratio:'1.30', status:'active', updatedAt:'2026-05-10 11:40' },
+  { id:2, level:'A', desc:'成熟教练，可独立承担团课与私教', coaches:6, ratio:'1.10', status:'active', updatedAt:'2026-05-10 11:42' },
+  { id:3, level:'B', desc:'常规教练，承担标准课程', coaches:5, ratio:'1.00', status:'active', updatedAt:'2026-05-10 11:43' },
+  { id:4, level:'C', desc:'助教 / 见习教练，需配置可授课程范围', coaches:2, ratio:'0.80', status:'active', updatedAt:'2026-05-10 11:45' },
+];
+
+const logData = [
+  { time:'2026-05-18 10:22', module:'约课管理', action:'扣费失败', actor:'管理员', object:'核心力量塑造 / 李晓彤', before:'未扣费', after:'扣费失败', impact:'当前课程卡剩余次数不足' },
+  { time:'2026-05-18 09:46', module:'约课管理', action:'批量签到', actor:'陈俊峰', object:'核心力量塑造 6 名学员', before:'未签到', after:'已签到', impact:'2 条进入待扣费' },
+  { time:'2026-05-17 18:10', module:'教练管理', action:'修改教练等级', actor:'管理员', object:'刘强', before:'A 级', after:'S 级', impact:'同步教练详情展示' },
+  { time:'2026-05-17 16:34', module:'课程卡', action:'修改适用课程方式', actor:'管理员', object:'私教 20 次卡', before:'按等级匹配', after:'指定课程固定适用', impact:'已购课程卡保留交易快照' },
+  { time:'2026-05-16 15:03', module:'财务', action:'人工处理异常退款', actor:'财务人员', object:'私教 - 减脂塑形 / 张伟', before:'退款失败', after:'已退还', impact:'取消异常解除' },
+  { time:'2026-05-16 09:20', module:'学员管理', action:'修改负责教练', actor:'总教练', object:'王小明', before:'李薇', after:'陈俊峰', impact:'历史订单负责教练快照不变' },
+];
+
+const coachColors = ['', 'pink', 'green', 'amber', 'teal'];
+function avatarColorFor(name) {
+  let sum = 0;
+  for (let i=0; i<name.length; i++) sum += name.charCodeAt(i);
+  return coachColors[sum % coachColors.length];
+}
+
+/* ============================================
+   HELPERS - BADGES
+   ============================================ */
+function statusBadge(s) {
+  const map = {
+    upcoming: ['badge-upcoming','待上课'],
+    ongoing:  ['badge-ongoing','正在上课'],
+    ended:    ['badge-ended','已结束'],
+    cancelled:['badge-cancelled','已取消'],
+  };
+  const [cls, label] = map[s] || ['badge-ended', s];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function cancelBadge(s) {
+  if (s === 'normal') return '<span style="color:var(--text-muted);font-size:12.5px;">—</span>';
+  const map = {
+    processing: ['badge-processing','取消处理中'],
+    abnormal:   ['badge-abnormal','取消异常'],
+    cancelled:  ['badge-cancelled','已取消'],
+  };
+  const [cls, label] = map[s] || ['badge-ended', s];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function typeBadge(t) {
+  const map = { group:'团课', private:'私教课', experience:'体验课' };
+  return `<span class="tag ${t}">${map[t]||t}</span>`;
+}
+function pendingBadge(n) {
+  if (!n) return '<span style="color:var(--text-muted);font-size:12.5px;">—</span>';
+  return `<span class="debit-tag debit-pending">⚠ ${n}条</span>`;
+}
+function studentStatusBadge(s) {
+  const map = {
+    active: ['badge-active','正常'],
+    expiring: ['badge-leave','即将到期'],
+    expired: ['badge-cancelled','已过期'],
+  };
+  const [cls, label] = map[s] || ['badge-ended', s];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function coachStatusBadge(s) {
+  const map = {
+    active: ['badge-active','在职'],
+    leave: ['badge-cancelled','离职'],
+  };
+  const [cls, label] = map[s] || ['badge-ended', s];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function levelChip(level) {
+  return `<span class="tag level-${level}">${level} 级</span>`;
+}
+
+/* ============================================
+   PAGINATION RENDERER (shared)
+   ============================================ */
+function renderPagination(containerId, total, currentPage, onChange) {
+  const pg = document.getElementById(containerId);
+  if (total <= 1) { pg.innerHTML = ''; return; }
+  let html = '';
+  html += `<button class="page-btn" ${currentPage===1?'disabled':''} onclick="${onChange}(${currentPage-1})">‹</button>`;
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || Math.abs(i - currentPage) <= 1) {
+      html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="${onChange}(${i})">${i}</button>`;
+    } else if (Math.abs(i - currentPage) === 2) {
+      html += `<span style="padding:0 4px;color:var(--text-muted);">…</span>`;
+    }
+  }
+  html += `<button class="page-btn" ${currentPage===total?'disabled':''} onclick="${onChange}(${currentPage+1})">›</button>`;
+  pg.innerHTML = html;
+}
+
+/* ============================================
+   BOOKING PAGE
+   ============================================ */
+let bookingTab = 'all', bookingPage = 1;
+const BOOKING_PER_PAGE = 7;
+
+function renderBookings() {
+  const search = (document.getElementById('bookingSearch').value || '').toLowerCase();
+  const typeF = document.getElementById('bookingType').value;
+  const dateF = document.getElementById('bookingDate').value;
+
+  let data = bookingData.filter(r => {
+    if (bookingTab !== 'all' && r.status !== bookingTab) return false;
+    if (search && !r.name.toLowerCase().includes(search) && !r.coach.toLowerCase().includes(search)) return false;
+    if (typeF && r.type !== typeF) return false;
+    if (dateF && r.date !== dateF) return false;
+    return true;
+  });
+
+  document.getElementById('bookingCount').textContent = `共 ${data.length} 条记录`;
+
+  const start = (bookingPage - 1) * BOOKING_PER_PAGE;
+  const pageData = data.slice(start, start + BOOKING_PER_PAGE);
+
+  const tbody = document.getElementById('bookingTbody');
+  if (!pageData.length) {
+    tbody.innerHTML = `<tr><td colspan="14"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">暂无符合条件的约课记录</div></div></td></tr>`;
+  } else {
+    tbody.innerHTML = pageData.map(r => `
+      <tr>
+        <td style="font-weight:600;">${r.date}</td>
+        <td>
+          <div style="font-weight:500;">${r.start}</div>
+          <div style="font-size:12px;color:var(--text-muted);">至 ${r.end}</div>
+        </td>
+        <td>
+          <div style="font-weight:500;">${r.venue}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${r.project}</div>
+        </td>
+        <td>${typeBadge(r.type)}</td>
+        <td style="color:var(--text-secondary);">${r.source}</td>
+        <td>${r.remaining}</td>
+        <td>
+          <button class="action-btn primary" onclick="openBookingDetail(${r.id})">${r.name}</button>
+        </td>
+        <td>
+          <div class="name-cell">
+            <div class="mini-avatar ${avatarColorFor(r.coach)}">${r.coach[0]}</div>
+            <span>${r.coach}</span>
+          </div>
+        </td>
+        <td><span style="font-weight:600;">${r.students}</span><span style="color:var(--text-muted);font-size:12px;">/${r.maxStudents}</span></td>
+        <td>${statusBadge(r.status)}</td>
+        <td>${cancelBadge(r.cancelStatus)}</td>
+        <td>${pendingBadge(r.pendingDebit)}</td>
+        <td style="color:var(--text-muted);font-size:12.5px;">${r.createdAt}</td>
+        <td>
+          <div class="action-group">
+            <button class="action-btn primary" onclick="openBookingDetail(${r.id})">详情</button>
+            ${r.status !== 'cancelled' ? `<button class="action-btn" onclick="alert('编辑教练 #${r.id}')">改教练</button>` : ''}
+            ${r.status !== 'ended' && r.status !== 'cancelled' ? `<button class="action-btn danger" onclick="cancelBooking(${r.id})">取消</button>` : ''}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  renderPagination('bookingPagination', Math.ceil(data.length / BOOKING_PER_PAGE), bookingPage, 'goBookingPage');
+}
+function goBookingPage(p) {
+  const total = Math.ceil((document.getElementById('bookingCount').textContent.match(/\d+/) || [10])[0] / BOOKING_PER_PAGE);
+  if (p < 1) return;
+  bookingPage = p;
+  renderBookings();
+}
+
+// Booking tab clicks
+document.querySelectorAll('#bookingTabs .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#bookingTabs .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    bookingTab = btn.dataset.tab;
+    bookingPage = 1;
+    renderBookings();
+  });
+});
+['bookingSearch','bookingType','bookingDate'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { bookingPage = 1; renderBookings(); });
+  document.getElementById(id).addEventListener('change', () => { bookingPage = 1; renderBookings(); });
+});
+function resetBookingFilters() {
+  document.getElementById('bookingSearch').value = '';
+  document.getElementById('bookingType').value = '';
+  document.getElementById('bookingDate').value = '';
+  bookingPage = 1;
+  renderBookings();
+}
+
+function openBookingDetail(id) {
+  const modal = document.getElementById('detailModal');
+  modal.classList.add('drawer-wide');
+  const body = document.getElementById('modalBody');
+  const title = document.getElementById('modalTitle');
+  const sub = document.getElementById('modalSub');
+  const actionBtn = document.getElementById('modalAction');
+
+  if (!id) {
+    title.textContent = '新建约课';
+    sub.textContent = '创建一条新的约课记录';
+    actionBtn.textContent = '保存';
+    body.innerHTML = `
+      <div class="detail-section">
+        <div class="detail-section-title">基础配置</div>
+        <div class="detail-grid">
+          <div class="detail-field" style="grid-column:1/-1;">
+            <div class="detail-field-label">选择课程</div>
+            <select class="filter-select" style="width:100%;margin-top:4px;">
+              <option>核心力量塑造</option>
+              <option>HIIT 燃脂训练</option>
+              <option>瑜伽塑形班</option>
+            </select>
+          </div>
+          <div class="detail-field">
+            <div class="detail-field-label">主教练</div>
+            <select class="filter-select" style="width:100%;margin-top:4px;">
+              <option>陈俊峰</option><option>李薇</option><option>张晓云</option>
+            </select>
+          </div>
+          <div class="detail-field">
+            <div class="detail-field-label">上课日期</div>
+            <input type="date" class="filter-input" style="width:100%;margin-top:4px;">
+          </div>
+          <div class="detail-field">
+            <div class="detail-field-label">开始时间</div>
+            <input type="time" class="filter-input" style="width:100%;margin-top:4px;" value="09:00">
+          </div>
+          <div class="detail-field">
+            <div class="detail-field-label">结束时间</div>
+            <input type="time" class="filter-input" style="width:100%;margin-top:4px;" value="10:00">
+          </div>
+          <div class="detail-field" style="grid-column:1/-1;">
+            <div class="detail-field-label">上课场地</div>
+            <select class="filter-select" style="width:100%;margin-top:4px;">
+              <option>A场地</option><option>B场地</option><option>C场地</option><option>泳池</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    `;
+    modal.classList.add('open');
+    return;
+  }
+
+  const r = bookingData.find(x => x.id === id);
+  if (!r) return;
+  title.textContent = r.name;
+  sub.textContent = `${r.date} ${r.start}–${r.end} · ${r.venue}`;
+  actionBtn.textContent = '编辑教练 / 备注';
+
+  const stuList = [
+    { name:'王小明', phone:'138****5621', card:'核心训练 12 次卡', total:12, remain:8, sign:'已签到', debit:'已扣费', pending:false, remark:'/' },
+    { name:'李晓彤', phone:'139****7832', card:'瑜伽月卡', total:30, remain:18, sign:'已签到', debit:'扣费失败', pending:true, remark:'课程卡余额不足' },
+    { name:'张伟',   phone:'135****9012', card:'私教 20 次卡', total:20, remain:3, sign:'未签到', debit:'未扣费', pending:false, remark:'/' },
+    { name:'刘婷',   phone:'186****3345', card:'-', total:'-', remain:'-', sign:'已请假', debit:'无需退还', pending:false, remark:'临时请假' },
+    { name:'陈建国', phone:'177****6689', card:'综合年卡', total:'不限', remain:'不限', sign:'已签到', debit:'未扣费', pending:true, remark:'待财务确认' },
+  ].slice(0, Math.min(r.students, 5));
+
+  body.innerHTML = `
+    <div class="detail-tabs">
+      <button class="detail-tab active">学员管理</button>
+      <button class="detail-tab">教练管理</button>
+      <button class="detail-tab">操作日志</button>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">基础信息</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="detail-field-label">课程类型</div><div class="detail-field-value">${{group:'团课',private:'私教课',experience:'体验课'}[r.type]}</div></div>
+        <div class="detail-field"><div class="detail-field-label">课程 / 项目</div><div class="detail-field-value">${r.name} · ${r.project}</div></div>
+        <div class="detail-field"><div class="detail-field-label">上课日期</div><div class="detail-field-value">${r.date}</div></div>
+        <div class="detail-field"><div class="detail-field-label">上课时间</div><div class="detail-field-value">${r.start} - ${r.end}</div></div>
+        <div class="detail-field"><div class="detail-field-label">上课场地</div><div class="detail-field-value">${r.venue}</div></div>
+        <div class="detail-field"><div class="detail-field-label">课时来源</div><div class="detail-field-value">${r.source}</div></div>
+        <div class="detail-field"><div class="detail-field-label">课程状态</div><div class="detail-field-value">${statusBadge(r.status)}</div></div>
+        <div class="detail-field"><div class="detail-field-label">取消状态</div><div class="detail-field-value">${cancelBadge(r.cancelStatus)}</div></div>
+        <div class="detail-field"><div class="detail-field-label">主教练</div><div class="detail-field-value">${r.coach}</div></div>
+        <div class="detail-field"><div class="detail-field-label">助教</div><div class="detail-field-value">${r.type === 'private' ? '/' : '赵明'}</div></div>
+        <div class="detail-field"><div class="detail-field-label">学员名额</div><div class="detail-field-value">${r.students} / ${r.maxStudents}</div></div>
+        <div class="detail-field"><div class="detail-field-label">创建时间</div><div class="detail-field-value">${r.createdAt}</div></div>
+      </div>
+    </div>
+    <div class="rule-grid">
+      <div class="rule-card">
+        <div class="rule-card-title">状态独立</div>
+        <div class="rule-card-text">课程状态、取消状态、签到状态、扣费状态独立展示，取消异常不会覆盖课程状态。</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-title">可执行操作</div>
+        <div class="rule-card-text">${r.status === 'cancelled' ? '已取消课程仅允许查看详情。' : '支持添加学员、签到、请假、扣费；已结束课程可补录处理。'}</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-card-title">待扣费定义</div>
+        <div class="rule-card-text">已签到且未扣费或扣费失败，且未请假、未取消、未移除时展示待扣费标记。</div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="section-toolbar">
+        <div class="detail-section-title" style="margin-bottom:0;">学员管理 (${stuList.length})</div>
+        <div class="page-actions">
+          <button class="btn btn-secondary btn-sm">添加学员</button>
+          <button class="btn btn-primary btn-sm">批量签到</button>
+        </div>
+      </div>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>姓名</th>
+            <th>课程卡</th>
+            <th>总 / 剩余</th>
+            <th>联系方式</th>
+            <th>签到状态</th>
+            <th>扣费状态</th>
+            <th>待扣费</th>
+            <th>备注</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${stuList.map(s => `
+            <tr>
+              <td><div class="name-cell"><div class="mini-avatar ${avatarColorFor(s.name)}">${s.name[0]}</div><span>${s.name}</span></div></td>
+              <td>${s.card}</td>
+              <td>${s.total} / ${s.remain}</td>
+              <td>${s.phone}</td>
+              <td><span class="debit-tag ${s.sign==='已签到'?'debit-ok':s.sign==='已请假'?'debit-pending':'debit-none'}">${s.sign}</span></td>
+              <td><span class="debit-tag ${s.debit==='已扣费'?'debit-ok':s.debit==='扣费失败'?'debit-fail':s.debit==='未扣费'?'debit-pending':'debit-none'}">${s.debit}</span></td>
+              <td>${s.pending ? '<span class="debit-tag debit-pending">待处理</span>' : '<span style="color:var(--text-muted);">/</span>'}</td>
+              <td style="color:var(--text-muted);">${s.remark}</td>
+              <td><div class="action-group"><button class="action-btn">请假</button><button class="action-btn">签到</button><button class="action-btn">扣费</button><button class="action-btn danger">移除</button></div></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">教练管理</div>
+      <div class="workflow">
+        <div class="workflow-step"><strong>修改主教练</strong><span>从可授课教练中选择，校验课程能力与时间冲突。</span></div>
+        <div class="workflow-step"><strong>修改助教</strong><span>支持多选，主教练与助教不可重复。</span></div>
+        <div class="workflow-step"><strong>历史修正</strong><span>已结束课程修改主教练需二次确认，并写入统计修正日志。</span></div>
+      </div>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+function cancelBooking(id) {
+  if (confirm('确认取消该课程？取消后将触发退款流程。')) alert('已提交取消');
+}
+function closeDetail() {
+  document.getElementById('detailModal').classList.remove('open', 'drawer-wide');
+}
+
+/* ============================================
+   STUDENT PAGE
+   ============================================ */
+let studentPage = 1;
+const STUDENT_PER_PAGE = 7;
+
+function renderStudents() {
+  const search = (document.getElementById('studentSearch').value || '').toLowerCase();
+  const coachF = document.getElementById('studentCoach').value;
+  const statusF = document.getElementById('studentStatus').value;
+
+  let data = studentData.filter(r => {
+    if (search && !r.name.toLowerCase().includes(search) && !r.phone.includes(search)) return false;
+    if (coachF && r.coach !== coachF) return false;
+    if (statusF && r.status !== statusF) return false;
+    return true;
+  });
+
+  document.getElementById('studentCount').textContent = `共 ${data.length} 位学员`;
+
+  const start = (studentPage - 1) * STUDENT_PER_PAGE;
+  const pageData = data.slice(start, start + STUDENT_PER_PAGE);
+
+  const tbody = document.getElementById('studentTbody');
+  if (!pageData.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">暂无符合条件的学员</div></div></td></tr>`;
+  } else {
+    tbody.innerHTML = pageData.map(s => `
+      <tr>
+        <td>
+          <div class="name-cell">
+            <div class="mini-avatar ${avatarColorFor(s.name)}">${s.name[0]}</div>
+            <div>
+              <div style="font-weight:500;">${s.name}</div>
+              <div style="font-size:11.5px;color:var(--text-muted);">ID: ${String(s.id).padStart(4,'0')}</div>
+            </div>
+          </div>
+        </td>
+        <td style="color:var(--text-secondary);">${s.phone}</td>
+        <td>${s.gender}</td>
+        <td>
+          <div class="name-cell">
+            <div class="mini-avatar ${avatarColorFor(s.coach)}" style="width:24px;height:24px;font-size:10px;">${s.coach[0]}</div>
+            <span style="font-size:13px;">${s.coach}</span>
+          </div>
+        </td>
+        <td>
+          <div style="font-weight:500;font-size:13px;">${s.cards}</div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">${s.cardRemain}</div>
+        </td>
+        <td>${studentStatusBadge(s.status)}</td>
+        <td style="color:var(--text-muted);font-size:12.5px;">${s.joinDate}</td>
+        <td>
+          <div class="action-group">
+            <button class="action-btn primary" onclick="openStudentDetail(${s.id})">详情</button>
+            <button class="action-btn" onclick="alert('编辑学员 #${s.id}')">编辑</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderPagination('studentPagination', Math.ceil(data.length / STUDENT_PER_PAGE), studentPage, 'goStudentPage');
+}
+function goStudentPage(p) {
+  if (p < 1) return;
+  studentPage = p;
+  renderStudents();
+}
+function resetStudentFilters() {
+  document.getElementById('studentSearch').value = '';
+  document.getElementById('studentCoach').value = '';
+  document.getElementById('studentStatus').value = '';
+  studentPage = 1;
+  renderStudents();
+}
+['studentSearch','studentCoach','studentStatus'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { studentPage = 1; renderStudents(); });
+  document.getElementById(id).addEventListener('change', () => { studentPage = 1; renderStudents(); });
+});
+
+function openStudentDetail(id) {
+  const s = studentData.find(x => x.id === id);
+  if (!s) return;
+  const modal = document.getElementById('detailModal');
+  modal.classList.add('drawer-wide');
+  document.getElementById('modalTitle').textContent = s.name;
+  document.getElementById('modalSub').textContent = `${s.phone} · 负责教练 ${s.coach}`;
+  document.getElementById('modalAction').textContent = '编辑';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-tabs">
+      <button class="detail-tab active">名下权益</button>
+      <button class="detail-tab">预约记录</button>
+      <button class="detail-tab">订单记录</button>
+      <button class="detail-tab">请假 / 取消 / 调课</button>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">基础信息</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="detail-field-label">手机号</div><div class="detail-field-value">${s.phone}</div></div>
+        <div class="detail-field"><div class="detail-field-label">性别</div><div class="detail-field-value">${s.gender}</div></div>
+        <div class="detail-field"><div class="detail-field-label">负责教练</div><div class="detail-field-value">${s.coach}</div></div>
+        <div class="detail-field"><div class="detail-field-label">会员状态</div><div class="detail-field-value">${studentStatusBadge(s.status)}</div></div>
+        <div class="detail-field"><div class="detail-field-label">注册时间</div><div class="detail-field-value">${s.joinDate}</div></div>
+        <div class="detail-field"><div class="detail-field-label">学员 ID</div><div class="detail-field-value">${String(s.id).padStart(6,'0')}</div></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">名下权益</div>
+      <table class="mini-table">
+        <thead><tr><th>权益名称</th><th>适用方式</th><th>总次数</th><th>剩余次数</th><th>到期时间</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>${s.cards}</td><td>按课程等级动态匹配</td><td>12</td><td>${s.cardRemain}</td><td>2026-08-30</td><td>${studentStatusBadge(s.status)}</td></tr>
+          <tr><td>体验课权益</td><td>指定课程固定适用</td><td>1</td><td>0</td><td>2026-06-01</td><td><span class="badge badge-ended">已用完</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">最近预约</div>
+      <table class="mini-table">
+        <thead><tr><th>课程</th><th>上课时间</th><th>主教练</th><th>签到</th><th>扣费</th><th>课程状态</th></tr></thead>
+        <tbody>
+          <tr><td>核心力量塑造</td><td>2026-05-18 09:00</td><td>${s.coach}</td><td><span class="debit-tag debit-ok">已签到</span></td><td><span class="debit-tag debit-pending">待扣费</span></td><td>${statusBadge('ongoing')}</td></tr>
+          <tr><td>瑜伽塑形班</td><td>2026-05-12 14:00</td><td>张晓云</td><td><span class="debit-tag debit-pending">已请假</span></td><td><span class="debit-tag debit-none">无需退还</span></td><td>${statusBadge('ended')}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">订单记录</div>
+      <table class="mini-table">
+        <thead><tr><th>订单号</th><th>购买商品</th><th>应付 / 实付</th><th>支付状态</th><th>退款状态</th><th>负责教练快照</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>TR20260518001</td><td>${s.cards}</td><td>¥1,680 / /</td><td><span class="badge badge-upcoming">待支付</span></td><td>/</td><td>${s.coach}</td><td><button class="action-btn">分享二维码</button><button class="action-btn primary">详情</button></td></tr>
+          <tr><td>TR20260516021</td><td>私教 10 次卡</td><td>¥2,800 / /</td><td><span class="badge badge-processing">已超期</span></td><td>/</td><td>李薇</td><td><button class="action-btn">重新发起</button><button class="action-btn primary">详情</button></td></tr>
+          <tr><td>TR20260428008</td><td>体验课权益</td><td>¥99 / ¥99</td><td><span class="badge badge-active">已支付</span></td><td><span class="badge badge-ended">未退款</span></td><td>${s.coach}</td><td><button class="action-btn primary">详情</button></td></tr>
+        </tbody>
+      </table>
+      <div class="section-note" style="margin-top:10px;">待支付订单只展示分享二维码；已超期订单才展示重新发起，重新发起成功后原订单进入已作废。</div>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+/* ============================================
+   COACH PAGE
+   ============================================ */
+function renderCoaches() {
+  const search = (document.getElementById('coachSearch').value || '').toLowerCase();
+  const levelF = document.getElementById('coachLevel').value;
+  const statusF = document.getElementById('coachStatus').value;
+
+  let data = coachData.filter(c => {
+    if (search && !c.name.toLowerCase().includes(search) && !c.phone.includes(search)) return false;
+    if (levelF && c.level !== levelF) return false;
+    if (statusF && c.status !== statusF) return false;
+    return true;
+  });
+
+  const grid = document.getElementById('coachGrid');
+  if (!data.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;"><div class="empty-state"><div class="empty-icon">🏋</div><div class="empty-text">暂无符合条件的教练</div></div></div>`;
+    return;
+  }
+  grid.innerHTML = data.map((c, i) => `
+    <div class="person-card" style="animation-delay:${0.05 + i * 0.04}s;" onclick="openCoachDetail(${c.id})">
+      <div class="person-card-header">
+        <div class="large-avatar ${avatarColorFor(c.name)}">${c.name[0]}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="person-name">${c.name}</div>
+          <div class="person-meta">${c.phone} · ${c.gender}</div>
+          <div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            ${levelChip(c.level)}
+            ${coachStatusBadge(c.status)}
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;line-height:1.4;">${c.skills}</div>
+      <div class="person-card-stats">
+        <div class="person-stat-item">
+          <div class="person-stat-value">${c.courses}</div>
+          <div class="person-stat-label">本月课程</div>
+        </div>
+        <div class="person-stat-item">
+          <div class="person-stat-value">${c.students}</div>
+          <div class="person-stat-label">学员数</div>
+        </div>
+        <div class="person-stat-item">
+          <div class="person-stat-value">${c.hours}</div>
+          <div class="person-stat-label">课时</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function resetCoachFilters() {
+  document.getElementById('coachSearch').value = '';
+  document.getElementById('coachLevel').value = '';
+  document.getElementById('coachStatus').value = '';
+  renderCoaches();
+}
+['coachSearch','coachLevel','coachStatus'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderCoaches);
+  document.getElementById(id).addEventListener('change', renderCoaches);
+});
+
+function openCoachDetail(id) {
+  const c = coachData.find(x => x.id === id);
+  if (!c) return;
+  const modal = document.getElementById('detailModal');
+  modal.classList.add('drawer-wide');
+  document.getElementById('modalTitle').textContent = c.name;
+  document.getElementById('modalSub').textContent = `${c.phone} · ${levelChip(c.level).replace(/<[^>]+>/g,'').trim()}`;
+  document.getElementById('modalAction').textContent = '编辑教练';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-tabs">
+      <button class="detail-tab active">详情</button>
+      <button class="detail-tab">排班</button>
+      <button class="detail-tab">学员订单</button>
+      <button class="detail-tab">上课记录</button>
+      <button class="detail-tab">评价数据</button>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">基础信息</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="detail-field-label">手机号</div><div class="detail-field-value">${c.phone}</div></div>
+        <div class="detail-field"><div class="detail-field-label">性别</div><div class="detail-field-value">${c.gender}</div></div>
+        <div class="detail-field"><div class="detail-field-label">等级</div><div class="detail-field-value">${levelChip(c.level)}</div></div>
+        <div class="detail-field"><div class="detail-field-label">在职状态</div><div class="detail-field-value">${coachStatusBadge(c.status)}</div></div>
+        <div class="detail-field" style="grid-column:1/-1;">
+          <div class="detail-field-label">擅长项目</div>
+          <div class="detail-field-value">${c.skills}</div>
+        </div>
+        <div class="detail-field" style="grid-column:1/-1;">
+          <div class="detail-field-label">可授课程 / 授课场馆</div>
+          <div class="detail-field-value">核心力量塑造、HIIT 燃脂训练、私教体能评估 · 总店 / 城西店</div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">本月数据</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="detail-field-label">课程数</div><div class="detail-field-value" style="font-size:20px;font-family:var(--font-display);">${c.courses}</div></div>
+        <div class="detail-field"><div class="detail-field-label">学员数</div><div class="detail-field-value" style="font-size:20px;font-family:var(--font-display);">${c.students}</div></div>
+        <div class="detail-field"><div class="detail-field-label">课时数</div><div class="detail-field-value" style="font-size:20px;font-family:var(--font-display);">${c.hours}</div></div>
+        <div class="detail-field"><div class="detail-field-label">学员评分</div><div class="detail-field-value" style="font-size:20px;font-family:var(--font-display);">4.${Math.floor(Math.random()*5)+5}</div></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">学员订单</div>
+      <table class="mini-table">
+        <thead><tr><th>订单号</th><th>学员</th><th>购买商品</th><th>应付 / 实付</th><th>支付状态</th><th>退款状态</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>TR20260518001</td><td>王小明</td><td>核心训练 12 次卡</td><td>¥1,680 / /</td><td><span class="badge badge-upcoming">待支付</span></td><td>/</td><td><button class="action-btn">分享二维码</button><button class="action-btn primary">详情</button></td></tr>
+          <tr><td>TR20260516021</td><td>张伟</td><td>私教 10 次卡</td><td>¥2,800 / /</td><td><span class="badge badge-processing">已超期</span></td><td>/</td><td><button class="action-btn">重新发起</button><button class="action-btn primary">详情</button></td></tr>
+          <tr><td>TR20260509018</td><td>刘婷</td><td>体验课权益</td><td>¥99 / ¥99</td><td><span class="badge badge-active">已支付</span></td><td><span class="badge badge-ended">未退款</span></td><td><button class="action-btn primary">详情</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">离职 / 删除前置校验</div>
+      <div class="split-layout">
+        <div class="permission-card">
+          <div class="permission-title">待处理负责课程</div>
+          <table class="mini-table">
+            <thead><tr><th>课程名称</th><th>课程类型</th><th>关联项目</th><th>主教练</th><th>处理</th></tr></thead>
+            <tbody>
+              <tr><td>核心力量塑造</td><td>团课</td><td>力量训练</td><td>${c.name}</td><td><button class="action-btn">更改教练</button></td></tr>
+              <tr><td>HIIT 燃脂训练</td><td>团课</td><td>有氧训练</td><td>${c.name}</td><td><button class="action-btn">更改教练</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="permission-card">
+          <div class="permission-title">待处理已约课</div>
+          <div class="section-note">存在未完成或有效约课时，不允许直接离职 / 删除。批量更换新教练时需校验同项目、同场馆、可授课与时间冲突。</div>
+        </div>
+      </div>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+/* ============================================
+   COURSE PAGE
+   ============================================ */
+let coursePage = 1;
+const COURSE_PER_PAGE = 8;
+
+function renderCourses() {
+  const search = (document.getElementById('courseSearch').value || '').toLowerCase();
+  const typeF = document.getElementById('courseType').value;
+
+  let data = courseData.filter(c => {
+    if (search && !c.name.toLowerCase().includes(search)) return false;
+    if (typeF && c.type !== typeF) return false;
+    return true;
+  });
+
+  document.getElementById('courseCount').textContent = `共 ${data.length} 门课程`;
+
+  const start = (coursePage - 1) * COURSE_PER_PAGE;
+  const pageData = data.slice(start, start + COURSE_PER_PAGE);
+
+  const tbody = document.getElementById('courseTbody');
+  if (!pageData.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📚</div><div class="empty-text">暂无符合条件的课程</div></div></td></tr>`;
+  } else {
+    tbody.innerHTML = pageData.map(c => `
+      <tr>
+        <td style="font-weight:500;">${c.name}</td>
+        <td>${typeBadge(c.type)}</td>
+        <td>${c.project}</td>
+        <td>${levelChip(c.level)}</td>
+        <td>${c.duration} 分钟</td>
+        <td>${c.max} 人</td>
+        <td><span class="badge badge-active">启用</span></td>
+        <td>
+          <div class="action-group">
+            <button class="action-btn primary" onclick="openCourseDetail(${c.id})">详情</button>
+            <button class="action-btn" onclick="openCourseDetail(${c.id})">编辑</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderPagination('coursePagination', Math.ceil(data.length / COURSE_PER_PAGE), coursePage, 'goCoursePage');
+}
+function goCoursePage(p) {
+  if (p < 1) return;
+  coursePage = p;
+  renderCourses();
+}
+function resetCourseFilters() {
+  document.getElementById('courseSearch').value = '';
+  document.getElementById('courseType').value = '';
+  coursePage = 1;
+  renderCourses();
+}
+['courseSearch','courseType'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { coursePage = 1; renderCourses(); });
+  document.getElementById(id).addEventListener('change', () => { coursePage = 1; renderCourses(); });
+});
+
+/* ============================================
+   CARD PAGE
+   ============================================ */
+let cardPage = 1;
+const CARD_PER_PAGE = 8;
+
+function renderCards() {
+  const search = (document.getElementById('cardSearch').value || '').toLowerCase();
+  const modeF = document.getElementById('cardMode').value;
+
+  let data = cardData.filter(c => {
+    if (search && !c.name.toLowerCase().includes(search)) return false;
+    if (modeF && c.mode !== modeF) return false;
+    return true;
+  });
+
+  document.getElementById('cardCount').textContent = `共 ${data.length} 张课程卡`;
+
+  const start = (cardPage - 1) * CARD_PER_PAGE;
+  const pageData = data.slice(start, start + CARD_PER_PAGE);
+
+  const tbody = document.getElementById('cardTbody');
+  if (!pageData.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">💳</div><div class="empty-text">暂无符合条件的课程卡</div></div></td></tr>`;
+  } else {
+    tbody.innerHTML = pageData.map(c => `
+      <tr>
+        <td style="font-weight:500;">${c.name}</td>
+        <td>${c.project}</td>
+        <td>${c.mode === 'level'
+          ? '<span class="tag" style="background:var(--brand-light);color:var(--brand-primary);">按等级匹配</span>'
+          : '<span class="tag private">指定课程</span>'}</td>
+        <td>${c.times}</td>
+        <td>${c.validity}</td>
+        <td style="font-family:var(--font-display);font-weight:600;color:var(--brand-primary);">${c.price}</td>
+        <td>${c.sold}</td>
+        <td>
+          <div class="action-group">
+            <button class="action-btn primary" onclick="openCardDetail(${c.id})">详情</button>
+            <button class="action-btn" onclick="openCardDetail(${c.id})">编辑</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  renderPagination('cardPagination', Math.ceil(data.length / CARD_PER_PAGE), cardPage, 'goCardPage');
+}
+function goCardPage(p) {
+  if (p < 1) return;
+  cardPage = p;
+  renderCards();
+}
+function resetCardFilters() {
+  document.getElementById('cardSearch').value = '';
+  document.getElementById('cardMode').value = '';
+  cardPage = 1;
+  renderCards();
+}
+['cardSearch','cardMode'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => { cardPage = 1; renderCards(); });
+  document.getElementById(id).addEventListener('change', () => { cardPage = 1; renderCards(); });
+});
+
+function openCourseDetail(id) {
+  const c = courseData.find(x => x.id === id);
+  if (!c) return;
+  const modal = document.getElementById('detailModal');
+  modal.classList.add('drawer-wide');
+  document.getElementById('modalTitle').textContent = c.name;
+  document.getElementById('modalSub').textContent = `${c.project} · ${typeBadge(c.type).replace(/<[^>]+>/g,'').trim()} · ${c.duration} 分钟`;
+  document.getElementById('modalAction').textContent = '保存课程';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">新增 / 编辑课程字段</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="detail-field-label">课程名称</div><div class="detail-field-value">${c.name}</div></div>
+        <div class="detail-field"><div class="detail-field-label">课程类型</div><div class="detail-field-value">${typeBadge(c.type)}</div></div>
+        <div class="detail-field"><div class="detail-field-label">关联项目</div><div class="detail-field-value">${c.project}</div></div>
+        <div class="detail-field"><div class="detail-field-label">课程等级</div><div class="detail-field-value">${levelChip(c.level)}</div></div>
+        <div class="detail-field"><div class="detail-field-label">课程时长</div><div class="detail-field-value">${c.duration} 分钟</div></div>
+        <div class="detail-field"><div class="detail-field-label">最大人数</div><div class="detail-field-value">${c.max} 人</div></div>
+        <div class="detail-field" style="grid-column:1/-1;"><div class="detail-field-label">签到立即扣费</div><div class="detail-field-value">开启后，学员签到成功时按所选课程卡立即扣费；扣费失败保留签到状态并标记扣费失败。</div></div>
+      </div>
+    </div>
+    <div class="rule-grid">
+      <div class="rule-card"><div class="rule-card-title">等级选择</div><div class="rule-card-text">课程等级受关联项目限制，只展示当前项目下可用等级。</div></div>
+      <div class="rule-card"><div class="rule-card-title">历史课时</div><div class="rule-card-text">补录历史时间创建课时，系统自动识别为已结束，可继续补签到、请假与扣费。</div></div>
+      <div class="rule-card"><div class="rule-card-title">统计修正</div><div class="rule-card-text">已结束课程修改主教练或课程时间会触发统计影响确认，并写入修正日志。</div></div>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function openCardDetail(id) {
+  const c = cardData.find(x => x.id === id);
+  if (!c) return;
+  const modal = document.getElementById('detailModal');
+  modal.classList.add('drawer-wide');
+  document.getElementById('modalTitle').textContent = c.name;
+  document.getElementById('modalSub').textContent = `${c.project} · ${c.mode === 'level' ? '按课程等级动态匹配' : '指定课程固定适用'}`;
+  document.getElementById('modalAction').textContent = '保存课程卡';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">基础信息</div>
+      <div class="detail-grid">
+        <div class="detail-field"><div class="detail-field-label">课程卡名称</div><div class="detail-field-value">${c.name}</div></div>
+        <div class="detail-field"><div class="detail-field-label">关联项目</div><div class="detail-field-value">${c.project}</div></div>
+        <div class="detail-field"><div class="detail-field-label">总次数</div><div class="detail-field-value">${c.times}</div></div>
+        <div class="detail-field"><div class="detail-field-label">有效期</div><div class="detail-field-value">${c.validity}</div></div>
+        <div class="detail-field"><div class="detail-field-label">售价</div><div class="detail-field-value">${c.price}</div></div>
+        <div class="detail-field"><div class="detail-field-label">已售</div><div class="detail-field-value">${c.sold}</div></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">适用课程配置</div>
+      <div class="split-layout">
+        <div class="permission-card">
+          <div class="permission-title">当前方式：${c.mode === 'level' ? '按课程等级动态匹配' : '指定课程固定适用'}</div>
+          <div class="workflow">
+            <div class="workflow-step"><strong>项目限制</strong><span>课程等级和关联课程都受课程卡项目限制。</span></div>
+            <div class="workflow-step"><strong>模式锁定</strong><span>已售课程卡保留购买时交易快照，不被后续配置覆盖。</span></div>
+            <div class="workflow-step"><strong>扣费选择</strong><span>多张卡适用时不自动合并，扣费按单张课程卡独立处理。</span></div>
+          </div>
+        </div>
+        <div class="permission-card">
+          <div class="permission-title">适用范围预览</div>
+          <div class="inline-list">
+            <span class="tag level-${c.mode === 'level' ? 'A' : 'S'}">${c.mode === 'level' ? 'A 级' : '私教体能评估'}</span>
+            <span class="tag level-B">${c.mode === 'level' ? 'B 级' : '私教 - 减脂塑形'}</span>
+            <span class="tag">共 ${c.mode === 'level' ? '6' : '2'} 门课程</span>
+          </div>
+          <div class="section-note" style="margin-top:12px;">历史课程卡默认兼容原可用范围；新购资产记录适用方式、项目、等级 / 课程清单快照。</div>
+        </div>
+      </div>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function renderCourseLevels() {
+  const tbody = document.getElementById('courseLevelTbody');
+  tbody.innerHTML = courseLevelData.map(l => `
+    <tr>
+      <td>${levelChip(l.name[0])}</td>
+      <td>${l.project}</td>
+      <td>${l.sort}</td>
+      <td>${l.courses}</td>
+      <td>${l.cards}</td>
+      <td><span class="badge badge-active">启用</span></td>
+      <td style="color:var(--text-muted);font-size:12.5px;">${l.updatedAt}</td>
+      <td><div class="action-group"><button class="action-btn primary" onclick="openCourseLevelDetail(${l.id})">编辑</button><button class="action-btn danger">删除</button></div></td>
+    </tr>
+  `).join('');
+}
+
+function renderCoachLevels() {
+  const tbody = document.getElementById('coachLevelTbody');
+  tbody.innerHTML = coachLevelData.map(l => `
+    <tr>
+      <td>${levelChip(l.level)}</td>
+      <td>${l.desc}</td>
+      <td>${l.coaches}</td>
+      <td>${l.ratio}</td>
+      <td><span class="badge badge-active">启用</span></td>
+      <td style="color:var(--text-muted);font-size:12.5px;">${l.updatedAt}</td>
+      <td><div class="action-group"><button class="action-btn primary" onclick="openCoachLevelDetail(${l.id})">编辑</button><button class="action-btn danger">删除</button></div></td>
+    </tr>
+  `).join('');
+}
+
+function openCourseLevelDetail(id) {
+  const l = courseLevelData.find(x => x.id === id) || { name:'新等级', project:'力量训练', sort:5, courses:0, cards:0 };
+  const modal = document.getElementById('detailModal');
+  document.getElementById('modalTitle').textContent = id ? '编辑课程等级' : '新增课程等级';
+  document.getElementById('modalSub').textContent = '同一项目下等级名称不可重复';
+  document.getElementById('modalAction').textContent = '保存等级';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-field"><div class="detail-field-label">等级名称</div><input class="filter-input" value="${l.name}" style="width:100%;margin-top:4px;"></div>
+      <div class="detail-field"><div class="detail-field-label">关联项目</div><input class="filter-input" value="${l.project}" style="width:100%;margin-top:4px;"></div>
+      <div class="detail-field"><div class="detail-field-label">排序</div><input class="filter-input" value="${l.sort}" style="width:100%;margin-top:4px;"></div>
+      <div class="detail-field"><div class="detail-field-label">删除校验</div><div class="detail-field-value">${l.courses ? `已有 ${l.courses} 门课程引用，不可直接删除` : '暂无课程引用，可删除'}</div></div>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function openCoachLevelDetail(id) {
+  const l = coachLevelData.find(x => x.id === id) || { level:'D', desc:'新等级说明', ratio:'1.00', coaches:0 };
+  const modal = document.getElementById('detailModal');
+  document.getElementById('modalTitle').textContent = id ? '编辑教练等级' : '新增教练等级';
+  document.getElementById('modalSub').textContent = '修改后新建和编辑教练时可选择该等级';
+  document.getElementById('modalAction').textContent = '保存等级';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-field"><div class="detail-field-label">等级</div><input class="filter-input" value="${l.level}" style="width:100%;margin-top:4px;"></div>
+      <div class="detail-field"><div class="detail-field-label">默认课时系数</div><input class="filter-input" value="${l.ratio}" style="width:100%;margin-top:4px;"></div>
+      <div class="detail-field" style="grid-column:1/-1;"><div class="detail-field-label">等级说明</div><input class="filter-input" value="${l.desc}" style="width:100%;margin-top:4px;"></div>
+      <div class="detail-field" style="grid-column:1/-1;"><div class="detail-field-label">删除校验</div><div class="detail-field-value">${l.coaches ? `已有 ${l.coaches} 名教练使用，不可直接删除` : '暂无教练使用，可删除'}</div></div>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function renderLogs() {
+  const search = (document.getElementById('logSearch').value || '').toLowerCase();
+  const moduleF = document.getElementById('logModule').value;
+  const tbody = document.getElementById('logTbody');
+  const data = logData.filter(l => {
+    if (moduleF && l.module !== moduleF) return false;
+    if (search && !`${l.actor}${l.object}${l.impact}`.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  tbody.innerHTML = data.length ? data.map(l => `
+    <tr>
+      <td style="color:var(--text-muted);font-size:12.5px;">${l.time}</td>
+      <td>${l.module}</td>
+      <td><span class="tag">${l.action}</span></td>
+      <td>${l.actor}</td>
+      <td>${l.object}</td>
+      <td>${l.before}</td>
+      <td>${l.after}</td>
+      <td style="color:var(--text-secondary);">${l.impact}</td>
+    </tr>
+  `).join('') : `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">暂无日志</div></div></td></tr>`;
+}
+function resetLogFilters() {
+  document.getElementById('logSearch').value = '';
+  document.getElementById('logModule').value = '';
+  renderLogs();
+}
+['logSearch','logModule'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderLogs);
+  document.getElementById(id).addEventListener('change', renderLogs);
+});
+
+/* ============================================
+   INIT
+   ============================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderBookings();
+});
+</script>
+</body>
+</html>
