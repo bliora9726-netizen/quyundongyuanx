@@ -296,7 +296,7 @@
   .table-wrap { overflow: auto; }
   table {
     width: 100%;
-    min-width: 1320px;
+    min-width: 1540px;
     border-collapse: collapse;
   }
   th, td {
@@ -532,6 +532,32 @@
   }
   .metric-label { color: var(--muted); font-size: 12px; }
   .metric-value { margin-top: 5px; font-size: 18px; font-weight: 700; }
+  .notice {
+    border: 1px solid rgba(24, 144, 255, 0.28);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #31506F;
+    background: rgba(24, 144, 255, 0.08);
+    font-size: 13px;
+  }
+  .notice.warning {
+    border-color: rgba(250, 140, 22, 0.28);
+    color: #7A4A12;
+    background: rgba(250, 140, 22, 0.09);
+  }
+  .rule-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .rule-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: #FBFCFE;
+  }
+  .rule-title { font-weight: 700; margin-bottom: 5px; }
+  .rule-desc { color: var(--subtext); font-size: 12px; }
   .mini-list {
     display: grid;
     gap: 10px;
@@ -600,7 +626,8 @@
     .filter-grid,
     .stats,
     .detail-grid,
-    .metric-grid { grid-template-columns: 1fr; }
+    .metric-grid,
+    .rule-grid { grid-template-columns: 1fr; }
     .radio-row { grid-column: span 1; }
     .topbar { padding: 0 14px; }
     .operator { display: none; }
@@ -698,7 +725,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>头像+姓名</th><th>手机号</th><th>城市</th><th>归属机构</th><th>归属门店</th><th>教学项目</th><th>入驻渠道</th><th>审核状态</th><th>教练状态</th><th>在售课程数</th><th>累计订单数</th><th>累计GMV</th><th>入驻时间</th><th>操作</th>
+                  <th>头像+姓名</th><th>手机号</th><th>城市</th><th>归属机构</th><th>归属门店</th><th>教学项目</th><th>入驻渠道</th><th>审核状态</th><th>教练状态</th><th>线上展示</th><th>C端可见</th><th>在售课程数</th><th>累计订单数</th><th>累计GMV</th><th>入驻时间</th><th>操作</th>
                 </tr>
               </thead>
               <tbody id="coachTableBody"></tbody>
@@ -747,7 +774,7 @@
 
         <section class="panel table-card">
           <div class="table-head">
-            <div><strong>审核队列</strong><span class="toolbar-note"> 超过 48 小时的申请已标红</span></div>
+            <div><strong>审核队列</strong><span class="toolbar-note"> 超过 48 小时的申请已标红；提交审核动作前会进行乐观锁校验</span></div>
             <button class="btn primary" type="button" onclick="toast('已按提交时间升序排序')"><i data-lucide="arrow-up-narrow-wide" width="15" height="15"></i>提交时间升序</button>
           </div>
           <div class="table-wrap">
@@ -786,23 +813,23 @@
 
 <script>
 const coaches = [
-  { id: 1, name: "陈俊峰", phone: "138****1111", gender: "男", city: "上海市", org: "跃动空间", store: "徐汇旗舰店", stores: ["徐汇旗舰店", "静安私教馆"], projects: ["力量训练", "HIIT", "私教体能"], channel: "馆掌添加", audit: "免审批", status: "正常", courses: 24, orders: 386, gmv: 286520, joined: "2025-08-12", avatar: "陈", color: "", since: "2018-03-01", titles: ["S级教练", "体能训练师", "明星教练"], rejectReason: "" },
-  { id: 2, name: "李薇", phone: "139****2222", gender: "女", city: "杭州市", org: "星河运动馆", store: "滨江训练馆", stores: ["滨江训练馆"], projects: ["普拉提", "瑜伽", "康复训练"], channel: "C端入驻", audit: "已通过", status: "正常", courses: 18, orders: 241, gmv: 174880, joined: "2026-03-20", avatar: "李", color: "purple", since: "2020-06-15", titles: ["普拉提导师", "产后修复"], rejectReason: "" },
-  { id: 3, name: "张晓云", phone: "137****3333", gender: "女", city: "北京市", org: "城市燃脂中心", store: "望京店", stores: ["望京店", "朝阳公园店"], projects: ["瑜伽", "冥想", "拉伸", "普拉提"], channel: "C端入驻", audit: "待审核", status: "正常", courses: 0, orders: 0, gmv: 0, joined: "2026-05-17", avatar: "张", color: "green", since: "2021-09-01", titles: ["瑜伽导师", "身心训练"], rejectReason: "" },
-  { id: 4, name: "王海", phone: "136****4444", gender: "男", city: "上海市", org: "跃动空间", store: "陆家嘴泳池店", stores: ["陆家嘴泳池店"], projects: ["游泳", "儿童体能"], channel: "馆掌添加", audit: "免审批", status: "已下架", courses: 6, orders: 92, gmv: 68200, joined: "2024-11-02", avatar: "王", color: "orange", since: "2017-04-16", titles: ["游泳教练", "救生员"], rejectReason: "" },
-  { id: 5, name: "刘强", phone: "135****5555", gender: "男", city: "广州市", org: "拳燃搏击", store: "天河店", stores: ["天河店"], projects: ["拳击", "搏击", "体能训练"], channel: "C端入驻", audit: "已驳回", status: "已禁用", courses: 9, orders: 134, gmv: 92360, joined: "2026-02-08", avatar: "刘", color: "", since: "2016-10-10", titles: ["拳击教练", "赛事裁判"], rejectReason: "资质证书图片模糊，请重新上传清晰证件。" },
-  { id: 6, name: "孙小雨", phone: "152****6666", gender: "女", city: "成都市", org: "乐动综合馆", store: "高新店", stores: ["高新店"], projects: ["舞蹈", "有氧操", "形体"], channel: "C端入驻", audit: "已通过", status: "已下架", courses: 12, orders: 128, gmv: 75840, joined: "2026-01-16", avatar: "孙", color: "purple", since: "2019-05-20", titles: ["舞蹈导师", "团课教练"], rejectReason: "" },
-  { id: 7, name: "周明", phone: "177****7777", gender: "男", city: "深圳市", org: "湾区体能馆", store: "南山店", stores: ["南山店"], projects: ["篮球", "体能训练"], channel: "C端入驻", audit: "待审核", status: "正常", courses: 0, orders: 0, gmv: 0, joined: "2026-05-18", avatar: "周", color: "green", since: "2022-02-14", titles: ["青训教练"], rejectReason: "" },
-  { id: 8, name: "赵雅", phone: "188****8888", gender: "女", city: "南京市", org: "瑜心空间", store: "玄武店", stores: ["玄武店"], projects: ["瑜伽", "普拉提"], channel: "馆掌添加", audit: "免审批", status: "已禁用", courses: 15, orders: 204, gmv: 136600, joined: "2025-06-18", avatar: "赵", color: "orange", since: "2015-08-18", titles: ["高级瑜伽导师"], rejectReason: "" }
+  { id: 1, name: "陈俊峰", phone: "138****1111", gender: "男", city: "上海市", org: "跃动空间", store: "徐汇旗舰店", stores: ["徐汇旗舰店", "静安私教馆"], projects: ["力量训练", "HIIT", "私教体能"], channel: "馆掌添加", audit: "免审批", status: "正常", onlineSwitch: true, courses: 24, orders: 386, gmv: 286520, joined: "2025-08-12", avatar: "陈", color: "", since: "2018-03-01", titles: ["S级教练", "体能训练师", "明星教练"], rejectReason: "" },
+  { id: 2, name: "李薇", phone: "139****2222", gender: "女", city: "杭州市", org: "星河运动馆", store: "滨江训练馆", stores: ["滨江训练馆"], projects: ["普拉提", "瑜伽", "康复训练"], channel: "C端入驻", audit: "已通过", status: "正常", onlineSwitch: null, courses: 18, orders: 241, gmv: 174880, joined: "2026-03-20", avatar: "李", color: "purple", since: "2020-06-15", titles: ["普拉提导师", "产后修复"], rejectReason: "" },
+  { id: 3, name: "张晓云", phone: "137****3333", gender: "女", city: "北京市", org: "城市燃脂中心", store: "望京店", stores: ["望京店", "朝阳公园店"], projects: ["瑜伽", "冥想", "拉伸", "普拉提"], channel: "C端入驻", audit: "待审核", status: "正常", onlineSwitch: null, courses: 0, orders: 0, gmv: 0, joined: "2026-05-17", avatar: "张", color: "green", since: "2021-09-01", titles: ["瑜伽导师", "身心训练"], rejectReason: "" },
+  { id: 4, name: "王海", phone: "136****4444", gender: "男", city: "上海市", org: "跃动空间", store: "陆家嘴泳池店", stores: ["陆家嘴泳池店"], projects: ["游泳", "儿童体能"], channel: "馆掌添加", audit: "免审批", status: "已下架", onlineSwitch: true, courses: 6, orders: 92, gmv: 68200, joined: "2024-11-02", avatar: "王", color: "orange", since: "2017-04-16", titles: ["游泳教练", "救生员"], rejectReason: "" },
+  { id: 5, name: "刘强", phone: "135****5555", gender: "男", city: "广州市", org: "拳燃搏击", store: "天河店", stores: ["天河店"], projects: ["拳击", "搏击", "体能训练"], channel: "C端入驻", audit: "已驳回", status: "已禁用", onlineSwitch: null, courses: 9, orders: 134, gmv: 92360, joined: "2026-02-08", avatar: "刘", color: "", since: "2016-10-10", titles: ["拳击教练", "赛事裁判"], rejectReason: "资质证书图片模糊，请重新上传清晰证件。" },
+  { id: 6, name: "孙小雨", phone: "152****6666", gender: "女", city: "成都市", org: "乐动综合馆", store: "高新店", stores: ["高新店"], projects: ["舞蹈", "有氧操", "形体"], channel: "C端入驻", audit: "已通过", status: "已下架", onlineSwitch: null, courses: 12, orders: 128, gmv: 75840, joined: "2026-01-16", avatar: "孙", color: "purple", since: "2019-05-20", titles: ["舞蹈导师", "团课教练"], rejectReason: "" },
+  { id: 7, name: "周明", phone: "177****7777", gender: "男", city: "深圳市", org: "湾区体能馆", store: "南山店", stores: ["南山店"], projects: ["篮球", "体能训练"], channel: "C端入驻", audit: "待审核", status: "正常", onlineSwitch: null, courses: 0, orders: 0, gmv: 0, joined: "2026-05-18", avatar: "周", color: "green", since: "2022-02-14", titles: ["青训教练"], rejectReason: "" },
+  { id: 8, name: "赵雅", phone: "188****8888", gender: "女", city: "南京市", org: "瑜心空间", store: "玄武店", stores: ["玄武店"], projects: ["瑜伽", "普拉提"], channel: "馆掌添加", audit: "免审批", status: "已禁用", onlineSwitch: false, courses: 15, orders: 204, gmv: 136600, joined: "2025-06-18", avatar: "赵", color: "orange", since: "2015-08-18", titles: ["高级瑜伽导师"], rejectReason: "" }
 ];
 
 const audits = [
-  { id: 101, coachId: 3, name: "张晓云", phone: "137****3333", gender: "女", city: "北京市", projects: ["瑜伽", "冥想", "拉伸", "普拉提"], submitted: "2026-05-16 08:42", waitHours: 73, audit: "待审核", auditor: "", auditTime: "", avatar: "张", color: "green", since: "2021-09-01", titles: ["瑜伽导师", "身心训练"], reason: "" },
-  { id: 102, coachId: 7, name: "周明", phone: "177****7777", gender: "男", city: "深圳市", projects: ["篮球", "体能训练"], submitted: "2026-05-18 09:16", waitHours: 28, audit: "待审核", auditor: "", auditTime: "", avatar: "周", color: "green", since: "2022-02-14", titles: ["青训教练"], reason: "" },
-  { id: 103, coachId: 9, name: "吴建民", phone: "159****9999", gender: "男", city: "上海市", projects: ["器械训练", "增肌"], submitted: "2026-05-18 20:05", waitHours: 17, audit: "待审核", auditor: "", auditTime: "", avatar: "吴", color: "", since: "2020-11-21", titles: ["增肌教练"], reason: "" },
-  { id: 104, coachId: 2, name: "李薇", phone: "139****2222", gender: "女", city: "杭州市", projects: ["普拉提", "瑜伽", "康复训练"], submitted: "2026-05-15 10:20", waitHours: 5, audit: "已通过", auditor: "王运营", auditTime: "2026-05-15 15:32", avatar: "李", color: "purple", since: "2020-06-15", titles: ["普拉提导师", "产后修复"], reason: "" },
-  { id: 105, coachId: 5, name: "刘强", phone: "135****5555", gender: "男", city: "广州市", projects: ["拳击", "搏击", "体能训练"], submitted: "2026-05-14 13:15", waitHours: 6, audit: "已驳回", auditor: "李运营", auditTime: "2026-05-14 19:10", avatar: "刘", color: "", since: "2016-10-10", titles: ["拳击教练", "赛事裁判"], reason: "职业认证不清晰；补充说明：请重新上传证书原件照片。" },
-  { id: 106, coachId: 6, name: "孙小雨", phone: "152****6666", gender: "女", city: "成都市", projects: ["舞蹈", "有氧操", "形体"], submitted: "2026-05-13 09:30", waitHours: 3, audit: "已通过", auditor: "王运营", auditTime: "2026-05-13 12:40", avatar: "孙", color: "purple", since: "2019-05-20", titles: ["舞蹈导师", "团课教练"], reason: "" }
+  { id: 101, coachId: 3, name: "张晓云", phone: "137****3333", gender: "女", city: "北京市", projects: ["瑜伽", "冥想", "拉伸", "普拉提"], submitted: "2026-05-16 08:42", waitHours: 73, audit: "待审核", auditor: "", auditTime: "", avatar: "张", color: "green", since: "2021-09-01", titles: ["瑜伽导师", "身心训练"], reason: "", version: 8 },
+  { id: 102, coachId: 7, name: "周明", phone: "177****7777", gender: "男", city: "深圳市", projects: ["篮球", "体能训练"], submitted: "2026-05-18 09:16", waitHours: 28, audit: "待审核", auditor: "", auditTime: "", avatar: "周", color: "green", since: "2022-02-14", titles: ["青训教练"], reason: "", version: 5 },
+  { id: 103, coachId: 9, name: "吴建民", phone: "159****9999", gender: "男", city: "上海市", projects: ["器械训练", "增肌"], submitted: "2026-05-18 20:05", waitHours: 17, audit: "待审核", auditor: "", auditTime: "", avatar: "吴", color: "", since: "2020-11-21", titles: ["增肌教练"], reason: "", version: 3, stale: true },
+  { id: 104, coachId: 2, name: "李薇", phone: "139****2222", gender: "女", city: "杭州市", projects: ["普拉提", "瑜伽", "康复训练"], submitted: "2026-05-15 10:20", waitHours: 5, audit: "已通过", auditor: "王运营", auditTime: "2026-05-15 15:32", avatar: "李", color: "purple", since: "2020-06-15", titles: ["普拉提导师", "产后修复"], reason: "", version: 12 },
+  { id: 105, coachId: 5, name: "刘强", phone: "135****5555", gender: "男", city: "广州市", projects: ["拳击", "搏击", "体能训练"], submitted: "2026-05-14 13:15", waitHours: 6, audit: "已驳回", auditor: "李运营", auditTime: "2026-05-14 19:10", avatar: "刘", color: "", since: "2016-10-10", titles: ["拳击教练", "赛事裁判"], reason: "职业认证不清晰；补充说明：请重新上传证书原件照片。", version: 7 },
+  { id: 106, coachId: 6, name: "孙小雨", phone: "152****6666", gender: "女", city: "成都市", projects: ["舞蹈", "有氧操", "形体"], submitted: "2026-05-13 09:30", waitHours: 3, audit: "已通过", auditor: "王运营", auditTime: "2026-05-13 12:40", avatar: "孙", color: "purple", since: "2019-05-20", titles: ["舞蹈导师", "团课教练"], reason: "", version: 9 }
 ];
 
 const statusClassMap = {
@@ -818,7 +845,14 @@ const statusClassMap = {
   "动态匹配": "blue",
   "固定指定": "gray",
   "上架": "success",
-  "下架": "warning"
+  "下架": "warning",
+  "开": "success",
+  "关": "gray",
+  "不适用": "gray",
+  "可见": "success",
+  "不可见": "danger",
+  "可操作": "success",
+  "置灰不可操作": "gray"
 };
 
 function tag(label, extra = "") {
@@ -840,21 +874,60 @@ function money(n) {
   return `¥${Number(n).toLocaleString("zh-CN")}`;
 }
 
+function isVenueCoach(c) {
+  return c.channel === "馆掌添加";
+}
+
+function isSwitchLocked(c) {
+  return isVenueCoach(c) && (c.status === "已下架" || c.status === "已禁用");
+}
+
+function onlineSwitchTag(c) {
+  if (!isVenueCoach(c)) return tag("不适用");
+  const locked = isSwitchLocked(c) ? " · 置灰" : "";
+  return `${tag(c.onlineSwitch ? "开" : "关")}<div class="name-sub">${locked || "馆掌可操作"}</div>`;
+}
+
+function isClientVisible(c) {
+  if (c.audit === "已通过" && c.status === "正常") return true;
+  if (c.audit === "免审批" && c.status === "正常" && c.onlineSwitch) return true;
+  return false;
+}
+
+function visibilityTag(c) {
+  return tag(isClientVisible(c) ? "可见" : "不可见");
+}
+
+function switchOperableTag(c) {
+  if (!isVenueCoach(c)) return tag("不适用");
+  return tag(isSwitchLocked(c) ? "置灰不可操作" : "可操作");
+}
+
+function visibilityReason(c) {
+  if (isClientVisible(c)) return isVenueCoach(c) ? "免审批 + 正常 + 馆掌线上展示开启，C端可搜索、可购买。" : "已通过 + 正常，C端可搜索、可购买。";
+  if (c.audit === "待审核") return "审核未完成，任意教练状态下均不对C端用户可见。";
+  if (c.audit === "已驳回") return "审核未通过，C端不可见。";
+  if (c.status === "已禁用") return "账号被超管禁用，所有端不可登录，C端不可见。";
+  if (c.status === "已下架") return "超管主动下架，C端不可见，馆掌侧线上展示开关置灰。";
+  if (isVenueCoach(c) && !c.onlineSwitch) return "馆掌主动关闭线上展示，仅影响新用户搜索发现，不改变超管教练状态。";
+  return "当前审核状态与教练状态未同时满足展示条件。";
+}
+
 function coachActions(c) {
   const action = [
     `<button class="btn text" type="button" onclick="event.stopPropagation(); openCoachDrawer(${c.id})">查看详情</button>`,
     `<button class="btn text" type="button" onclick="event.stopPropagation(); toast('已打开 ${c.org} 馆掌后台')">跳入馆掌</button>`
   ];
   if (c.status === "正常") {
-    action.push(`<button class="btn text warning" type="button" onclick="event.stopPropagation(); toast('已下架 ${c.name}，C端不再展示')">下架</button>`);
-    action.push(`<button class="btn text danger" type="button" onclick="event.stopPropagation(); toast('请填写禁用原因后执行')">禁用</button>`);
+    action.push(`<button class="btn text warning" type="button" onclick="event.stopPropagation(); toast('已下架 ${c.name}，C端不再展示；馆掌线上展示开关已置灰')">下架</button>`);
+    action.push(`<button class="btn text danger" type="button" onclick="event.stopPropagation(); toast('请填写禁用原因后执行；禁用后所有端不可登录')">禁用</button>`);
   }
   if (c.status === "已下架") {
-    action.push(`<button class="btn text" type="button" onclick="event.stopPropagation(); toast('已恢复展示 ${c.name}')">恢复展示</button>`);
-    action.push(`<button class="btn text danger" type="button" onclick="event.stopPropagation(); toast('请填写禁用原因后执行')">禁用</button>`);
+    action.push(`<button class="btn text" type="button" onclick="event.stopPropagation(); toast('已恢复展示 ${c.name}；馆掌线上展示开关恢复可操作')">恢复展示</button>`);
+    action.push(`<button class="btn text danger" type="button" onclick="event.stopPropagation(); toast('请填写禁用原因后执行；禁用后所有端不可登录')">禁用</button>`);
   }
   if (c.status === "已禁用") {
-    action.push(`<button class="btn text" type="button" onclick="event.stopPropagation(); toast('已解除禁用，账号恢复正常')">解除禁用</button>`);
+    action.push(`<button class="btn text" type="button" onclick="event.stopPropagation(); toast('已解除禁用，账号直接恢复正常；满足审核/开关条件则C端立即可见')">解除禁用</button>`);
   }
   return `<div class="action-group">${action.join("")}</div>`;
 }
@@ -871,6 +944,8 @@ function renderCoachTable() {
       <td>${tag(c.channel)}</td>
       <td>${tag(c.audit)}</td>
       <td>${tag(c.status)}</td>
+      <td>${onlineSwitchTag(c)}</td>
+      <td>${visibilityTag(c)}</td>
       <td>${c.courses}</td>
       <td>${c.orders}</td>
       <td class="money">${money(c.gmv)}</td>
@@ -883,10 +958,23 @@ function renderCoachTable() {
 function auditActions(a) {
   const action = [`<button class="btn text" type="button" onclick="event.stopPropagation(); openAuditDrawer(${a.id})">查看详情</button>`];
   if (a.audit === "待审核") {
-    action.push(`<button class="btn text" type="button" onclick="event.stopPropagation(); toast('已通过 ${a.name} 的入驻申请，系统将自动通知教练')">通过</button>`);
-    action.push(`<button class="btn text danger" type="button" onclick="event.stopPropagation(); toast('请选择预设驳回原因并填写补充说明')">驳回</button>`);
+    action.push(`<button class="btn text" type="button" onclick="event.stopPropagation(); reviewAudit(${a.id}, '通过')">通过</button>`);
+    action.push(`<button class="btn text danger" type="button" onclick="event.stopPropagation(); reviewAudit(${a.id}, '驳回')">驳回</button>`);
   }
   return `<div class="action-group">${action.join("")}</div>`;
+}
+
+function reviewAudit(id, action) {
+  const item = audits.find(x => x.id === id);
+  if (item?.stale) {
+    toast("该申请已被处理，请刷新列表");
+    return;
+  }
+  if (action === "通过") {
+    toast(`乐观锁校验通过，已通过 ${item.name} 的入驻申请，系统将自动通知教练`);
+  } else {
+    toast("乐观锁校验通过，请选择预设驳回原因并填写补充说明");
+  }
 }
 
 function renderAuditTable() {
@@ -962,15 +1050,15 @@ function openCoachDrawer(id) {
     drawerButton("跳入馆掌", "external-link", "", `toast('已打开 ${c.org} 馆掌后台')`)
   ];
   if (c.status === "正常") {
-    actions.push(drawerButton("下架", "eye-off", "", `toast('已下架 ${c.name}，C端不再展示')`));
-    actions.push(drawerButton("禁用", "ban", "danger", `toast('请填写禁用原因后执行')`));
+    actions.push(drawerButton("下架", "eye-off", "", `toast('已下架 ${c.name}，C端不再展示；馆掌线上展示开关已置灰')`));
+    actions.push(drawerButton("禁用", "ban", "danger", `toast('请填写禁用原因后执行；禁用后所有端不可登录')`));
   }
   if (c.status === "已下架") {
-    actions.push(drawerButton("恢复展示", "eye", "primary", `toast('已恢复展示 ${c.name}')`));
-    actions.push(drawerButton("禁用", "ban", "danger", `toast('请填写禁用原因后执行')`));
+    actions.push(drawerButton("恢复展示", "eye", "primary", `toast('已恢复展示 ${c.name}；馆掌线上展示开关恢复可操作')`));
+    actions.push(drawerButton("禁用", "ban", "danger", `toast('请填写禁用原因后执行；禁用后所有端不可登录')`));
   }
   if (c.status === "已禁用") {
-    actions.push(drawerButton("解除禁用", "shield-check", "primary", `toast('已解除禁用，账号恢复正常')`));
+    actions.push(drawerButton("解除禁用", "shield-check", "primary", `toast('已解除禁用，账号直接恢复正常；满足审核/开关条件则C端立即可见')`));
   }
   document.getElementById("drawerActions").innerHTML = actions.join("");
   document.getElementById("drawerBody").innerHTML = `
@@ -986,7 +1074,21 @@ function openCoachDrawer(id) {
           <div class="detail-item"><div class="detail-label">入驻时间</div><div class="detail-value">${c.joined}</div></div>
           <div class="detail-item"><div class="detail-label">教练状态</div><div class="detail-value">${tag(c.status)}</div></div>
           <div class="detail-item"><div class="detail-label">审核状态</div><div class="detail-value">${tag(c.audit)}</div></div>
+          <div class="detail-item"><div class="detail-label">线上展示</div><div class="detail-value">${onlineSwitchTag(c)}</div></div>
+          <div class="detail-item"><div class="detail-label">馆掌开关权限</div><div class="detail-value">${switchOperableTag(c)}</div></div>
+          <div class="detail-item"><div class="detail-label">C端可见</div><div class="detail-value">${visibilityTag(c)}</div></div>
+          <div class="detail-item full"><div class="detail-label">展示判断说明</div><div class="detail-value">${visibilityReason(c)}</div></div>
           ${c.rejectReason ? `<div class="detail-item full"><div class="detail-label">驳回原因</div><div class="detail-value danger-text">${c.rejectReason}</div></div>` : ""}
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <div class="section-title">C端展示与开关优先级</div>
+      <div class="section-body">
+        <div class="rule-grid">
+          <div class="rule-card"><div class="rule-title">联合判断</div><div class="rule-desc">审核状态与教练状态需同时满足；免审批教练还需馆掌线上展示开关为开。</div></div>
+          <div class="rule-card"><div class="rule-title">超管优先</div><div class="rule-desc">超管下架或禁用后，馆掌开关自动置灰，馆掌管理员不可操作。</div></div>
+          <div class="rule-card"><div class="rule-title">履约保护</div><div class="rule-desc">线上展示关闭或超管下架只限制新购，已购未完成订单仍可上课、核验和完课。</div></div>
         </div>
       </div>
     </section>
@@ -1003,13 +1105,13 @@ function openCoachDrawer(id) {
       <div class="section-body">
         <div class="metric-grid">
           <div class="metric"><div class="metric-label">订单数</div><div class="metric-value">32</div></div>
-          <div class="metric"><div class="metric-label">GMV</div><div class="metric-value">¥24,680</div></div>
+          <div class="metric"><div class="metric-label">GMV</div><div class="metric-value">¥24,680</div><div class="name-sub">扣除同期退款，跨期退款不追溯</div></div>
           <div class="metric"><div class="metric-label">退款单数</div><div class="metric-value">2</div></div>
           <div class="metric"><div class="metric-label">退款金额</div><div class="metric-value">¥1,280</div></div>
           <div class="metric"><div class="metric-label">新增学员数</div><div class="metric-value">11</div></div>
           <div class="metric"><div class="metric-label">累计学员数</div><div class="metric-value">${Math.max(c.orders - 80, 0)}</div></div>
           <div class="metric"><div class="metric-label">在售课程数</div><div class="metric-value">${c.courses}</div></div>
-          <div class="metric"><div class="metric-label">最近上课时间</div><div class="metric-value" style="font-size:14px;">2026-05-18 19:30</div></div>
+          <div class="metric"><div class="metric-label">最近完课时间</div><div class="metric-value" style="font-size:14px;">2026-05-18 19:30</div></div>
         </div>
       </div>
     </section>
@@ -1024,8 +1126,8 @@ function openAuditDrawer(id) {
   document.getElementById("drawerSubtitle").textContent = `${a.name} · ${a.submitted} 提交`;
   const actions = [];
   if (a.audit === "待审核") {
-    actions.push(drawerButton("通过", "check", "primary", `toast('已通过 ${a.name} 的入驻申请，系统将自动通知教练')`));
-    actions.push(drawerButton("驳回", "x", "danger", `toast('请选择预设驳回原因并填写补充说明')`));
+    actions.push(drawerButton("通过", "check", "primary", `reviewAudit(${a.id}, '通过')`));
+    actions.push(drawerButton("驳回", "x", "danger", `reviewAudit(${a.id}, '驳回')`));
   } else {
     actions.push(drawerButton("查看通知记录", "bell", "", `toast('已打开自动通知记录')`));
   }
@@ -1034,11 +1136,13 @@ function openAuditDrawer(id) {
     <section class="section">
       <div class="section-title">基本信息</div>
       <div class="section-body">
+        <div class="notice ${a.waitHours > 48 ? "warning" : ""}" style="margin-bottom:12px;">审核提交前会基于记录版本 v${a.version} 执行乐观锁校验；若记录已被其他运营处理，将提示“该申请已被处理，请刷新列表”。</div>
         <div class="profile-line">${avatar(a)}<div><div class="name-main">${a.name}</div><div class="name-sub">${a.city} · ${a.gender}</div></div></div>
         <div class="detail-grid">
           <div class="detail-item"><div class="detail-label">手机号</div><div class="detail-value">${a.phone}</div></div>
           <div class="detail-item"><div class="detail-label">提交时间</div><div class="detail-value">${a.submitted}</div></div>
           <div class="detail-item"><div class="detail-label">等待时长</div><div class="detail-value ${a.waitHours > 48 ? "danger-text" : ""}">${a.waitHours} 小时</div></div>
+          <div class="detail-item"><div class="detail-label">记录版本</div><div class="detail-value">v${a.version}${a.stale ? "（模拟并发已处理）" : ""}</div></div>
           <div class="detail-item full"><div class="detail-label">教学项目</div><div class="detail-value"><div class="tags">${a.projects.map(p => `<span class="tag gray no-dot">${p}</span>`).join("")}</div></div></div>
         </div>
       </div>
